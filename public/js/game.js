@@ -1,8 +1,12 @@
+const width = 800;
+const height = 600;
+
 const config = {
   type: Phaser.AUTO,
+  // TODO: specify parent container
   parent: 'phaser-example',
-  width: 800,
-  height: 600,
+  width: width,
+  height: height,
   physics: {
     default: 'arcade',
     arcade: {
