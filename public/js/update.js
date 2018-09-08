@@ -1,7 +1,15 @@
 function update() {
-
   handlerPlayerMovement();
+  debug();
+}
 
+function debug() {
+  self.text.setText([
+    'ScrollX: ' + self.camera.scrollX,
+    'ScrollY: ' + self.camera.scrollY,
+    'MidX: ' + Math.round(self.player.x),
+    'MidY: ' + Math.round(self.player.y)
+  ])
 }
 
 function handlerPlayerMovement() {
@@ -21,7 +29,7 @@ function handlerPlayerMovement() {
     move('right', 160, -160);
   }
   else if (cursors.right.isDown && cursors.down.isDown) {
-    move('right', 60, 160);
+    move('right', 160, 160);
   }
   else if (cursors.left.isDown) {
     move('left', -160, 0);

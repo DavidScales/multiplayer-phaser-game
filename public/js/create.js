@@ -1,16 +1,24 @@
-const worldSize = 2000;
+const worldSize = 1920;
 // TODO: better scoping
 const self = {};
 
 function create() {
+  // World
+  self.camera = this.cameras.main;
+  self.camera.setBounds(0, 0, worldSize, worldSize);
   this.physics.world.setBounds(0, 0, worldSize, worldSize);
+  this.add.tileSprite(0, 0, worldSize, worldSize, 'misc', 64)
+    .setScale(2);
 
+  // Player
   self.player = spawnPlayer(this);
-  this.cameras.main.startFollow(self.player);
+  self.camera.startFollow(self.player, true);
 
-  // this.add.tileSprite()
-
+  // Controls
   cursors = this.input.keyboard.createCursorKeys();
+
+  // Text
+  self.text = this.add.text(32, 32).setScrollFactor(0).setFontSize(32).setColor('#ffffff');
 }
 
 function spawnPlayer(game) {
@@ -25,7 +33,7 @@ function spawnPlayer(game) {
     }
   }
 
-  const player = game.physics.add.sprite(width / 2, height / 2, spriteSheet.key)
+  const player = game.physics.add.sprite(worldSize / 2, worldSize / 2, spriteSheet.key)
     .setScale(2);
 
   player.setCollideWorldBounds(true);
