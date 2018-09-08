@@ -15,35 +15,29 @@ function create() {
 
 function spawnPlayer(game) {
 
-  const player = game.physics.add.sprite(width / 2, height / 2, 'characters')
+  const spriteSheet = {
+    key: 'characters',
+    frames: {
+      down: { start: 0, end: 2 },
+      left: { start: 12, end: 14 },
+      right: { start: 24, end: 26 },
+      up: { start: 36, end: 38 },
+    }
+  }
+
+  const player = game.physics.add.sprite(width / 2, height / 2, spriteSheet.key)
     .setScale(2);
 
   player.setCollideWorldBounds(true);
 
-  game.anims.create({
-    key: 'down',
-    frames: game.anims.generateFrameNumbers('characters', { start: 0, end: 2 }),
-    frameRate: 10,
-    repeat: -1
-  });
-  game.anims.create({
-      key: 'left',
-      frames: game.anims.generateFrameNumbers('characters', { start: 12, end: 14 }),
+  Object.keys(spriteSheet.frames).forEach(direction => {
+    game.anims.create({
+      key: direction,
+      frames: game.anims.generateFrameNumbers(spriteSheet.key, spriteSheet.frames[direction]),
       frameRate: 10,
       repeat: -1
-  });
-  game.anims.create({
-      key: 'right',
-      frames: game.anims.generateFrameNumbers('characters', { start: 24, end: 26 }),
-      frameRate: 10,
-      repeat: -1
-  });
-  game.anims.create({
-    key: 'up',
-    frames: game.anims.generateFrameNumbers('characters', { start: 36, end: 38 }),
-    frameRate: 10,
-    repeat: -1
-  });
+    });
+  })
 
   return player;
 }
