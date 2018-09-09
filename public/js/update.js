@@ -4,19 +4,19 @@ function update() {
 }
 
 function debug() {
-  self.text.setText([
-    'ScrollX: ' + self.camera.scrollX,
-    'ScrollY: ' + self.camera.scrollY,
-    'MidX: ' + Math.round(self.player.x),
-    'MidY: ' + Math.round(self.player.y)
+  game.text.setText([
+    'ScrollX: ' + game.camera.scrollX,
+    'ScrollY: ' + game.camera.scrollY,
+    'MidX: ' + Math.round(game.player.x),
+    'MidY: ' + Math.round(game.player.y)
   ])
 }
 
 function handlerPlayerMovement() {
 
   function move(animation, xVelocity, yVelocity) {
-    self.player.anims.play(animation, true);
-    self.player.setVelocity(xVelocity, yVelocity);
+    game.player.anims.play(animation, true);
+    game.player.setVelocity(xVelocity, yVelocity);
   }
 
   if (cursors.left.isDown && cursors.up.isDown) {
@@ -44,7 +44,7 @@ function handlerPlayerMovement() {
     move('down',0, 160);
   }
   else {
-    self.player.anims.stop();
-    self.player.setVelocity(0, 0);
+    game.player.anims.stop();
+    game.player.setVelocity(0, 0);
   }
 }
