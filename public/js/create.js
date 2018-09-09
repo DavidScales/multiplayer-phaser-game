@@ -15,6 +15,10 @@ function create() {
   // Controls
   cursors = this.input.keyboard.createCursorKeys();
 
+  // Obstacles
+  this.randomGrid = this.generateRandomGrid(worldSize);
+  this.obstacles = this.generateObstacles();
+
   // Text
   this.text = this.add.text(32, 32).setScrollFactor(0).setFontSize(32).setColor('#ffffff');
 }
@@ -48,10 +52,53 @@ function spawnPlayer() {
   return player;
 }
 
+//
+function shuffle(array) {
+  let currentIndex, randomIndex, tempValue;
+  for (currentIndex = array.length - 1; currentIndex > 0; currentIndex--) {
+      randomIndex = Math.floor(Math.random() * (currentIndex + 1));
+      tempValue = array[currentIndex];
+      array[currentIndex] = array[randomIndex];
+      array[randomIndex] = tempValue;
+  }
+  return array;
+}
 
-  // Obstacles
-  // game.grid = generateGrid(worldSize);
+//
+function generateRandomGrid(worldSize) {
+  const grid = [];
+  const gridUnitSize = 32;
+  const gridEdge = Math.floor(worldSize / gridUnitSize);
+  for (let x = 0; x < gridEdge; x++) {
+      for (let y = 0; y < gridEdge; y++) {
+          let gridX = x * gridUnitSize;
+          let gridY = y * gridUnitSize;
+          grid.push({x: gridX, y: gridY});
+      }
+  }
+  return shuffle(grid);
+}
 
-  // const numObstacles = Math.floor(game.grid.length * 0.1);
-  // game.obstacles = generateObstacles(this, numObstacles);
+//
+function generateObstacles() {
+  const numObstacles = Math.floor(this.randomGrid.length * 0.05);
+  const obstacles = this.physics.add.staticGroup();
+  const tempObstacleFrames = [20, 30, 38, 58]; // TODO:
+
+  for (let i = 0; i < numObstacles; i++) {
+    let randomLocation = this.randomGrid.pop();
+    let randomSpriteFrame = tempObstacleFrames[Math.floor(Math.random() * tempObstacleFrames.length)];
+    this.generateObstacle(obstacles, randomLocation, randomSpriteFrame);
+  }
+  this.physics.add.collider(this.player, obstacles);
+  return obstacles;
+}
+
+//
+function generateObstacle(obstacles, location, spriteFrame) {
+  obstacles.create(location.x, location.y, 'misc', spriteFrame)
+    .setScale(2).refreshBody();
+}
+
+
 

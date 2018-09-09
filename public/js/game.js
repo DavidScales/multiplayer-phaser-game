@@ -10,8 +10,10 @@ const QuestGame = new Phaser.Class({
   update: update,
   spawnPlayer: spawnPlayer,
   handlerPlayerMovement: handlerPlayerMovement,
-  debug: debug
-
+  debug: debug,
+  generateRandomGrid: generateRandomGrid,
+  generateObstacle: generateObstacle,
+  generateObstacles: generateObstacles
 });
 
 const width = 800;
