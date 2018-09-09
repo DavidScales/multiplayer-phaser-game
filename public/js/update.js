@@ -1,50 +1,51 @@
 function update() {
-  handlerPlayerMovement();
-  debug();
+  this.handlerPlayerMovement();
+  this.debug();
 }
 
 function debug() {
-  game.text.setText([
-    'ScrollX: ' + game.camera.scrollX,
-    'ScrollY: ' + game.camera.scrollY,
-    'MidX: ' + Math.round(game.player.x),
-    'MidY: ' + Math.round(game.player.y)
+  this.text.setText([
+    'ScrollX: ' + this.cameras.main.scrollX,
+    'ScrollY: ' + this.cameras.main.scrollY,
+    'MidX: ' + Math.round(this.player.x),
+    'MidY: ' + Math.round(this.player.y)
   ])
+}
+
+function move(sprite, animation, xVelocity, yVelocity) {
+  sprite.anims.play(animation, true);
+  sprite.setVelocity(xVelocity, yVelocity);
 }
 
 function handlerPlayerMovement() {
 
-  function move(animation, xVelocity, yVelocity) {
-    game.player.anims.play(animation, true);
-    game.player.setVelocity(xVelocity, yVelocity);
-  }
-
   if (cursors.left.isDown && cursors.up.isDown) {
-    move('left', -160, -160);
+    move(this.player, 'left', -160, -160);
   }
   else if (cursors.left.isDown && cursors.down.isDown) {
-    move('left', -160, 160);
+    move(this.player, 'left', -160, 160);
   }
   else if (cursors.right.isDown && cursors.up.isDown) {
-    move('right', 160, -160);
+    move(this.player, 'right', 160, -160);
   }
   else if (cursors.right.isDown && cursors.down.isDown) {
-    move('right', 160, 160);
+    move(this.player, 'right', 160, 160);
   }
   else if (cursors.left.isDown) {
-    move('left', -160, 0);
+    move(this.player, 'left', -160, 0);
   }
   else if (cursors.right.isDown) {
-    move('right', 160, 0);
+    move(this.player, 'right', 160, 0);
   }
   else if (cursors.up.isDown) {
-    move('up', 0, -160);
+    move(this.player, 'up', 0, -160);
   }
   else if (cursors.down.isDown) {
-    move('down',0, 160);
+    move(this.player, 'down',0, 160);
   }
   else {
-    game.player.anims.stop();
-    game.player.setVelocity(0, 0);
+    this.player.anims.stop();
+    this.player.setVelocity(0, 0);
   }
 }
+

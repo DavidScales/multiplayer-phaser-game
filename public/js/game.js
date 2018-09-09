@@ -1,3 +1,19 @@
+const QuestGame = new Phaser.Class({
+
+  Extends: Phaser.Scene,
+
+  initialize: function QuestGame() {
+    Phaser.Scene.call(this, { key: 'questgame' });
+  },
+  preload: preload,
+  create: create,
+  update: update,
+  spawnPlayer: spawnPlayer,
+  handlerPlayerMovement: handlerPlayerMovement,
+  debug: debug
+
+});
+
 const width = 800;
 const height = 600;
 
@@ -13,11 +29,7 @@ const config = {
       gravity: { y: 0 }
     }
   },
-  scene: {
-    preload: preload,
-    create: create,
-    update: update
-  }
+  scene: [ QuestGame ]
 };
 
 const game = new Phaser.Game(config);

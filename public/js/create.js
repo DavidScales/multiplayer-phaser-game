@@ -1,27 +1,25 @@
 const worldSize = 1920;
 
 function create() {
-  this.game = {};
 
   // World
-  game.camera = this.cameras.main;
-  game.camera.setBounds(0, 0, worldSize, worldSize);
+  this.cameras.main.setBounds(0, 0, worldSize, worldSize);
   this.physics.world.setBounds(0, 0, worldSize, worldSize);
   this.add.tileSprite(0, 0, worldSize, worldSize, 'misc', 64)
     .setScale(2);
 
   // Player
-  game.player = spawnPlayer(this);
-  game.camera.startFollow(game.player, true);
+  this.player = this.spawnPlayer();
+  this.cameras.main.startFollow(this.player, true);
 
   // Controls
   cursors = this.input.keyboard.createCursorKeys();
 
   // Text
-  game.text = this.add.text(32, 32).setScrollFactor(0).setFontSize(32).setColor('#ffffff');
+  this.text = this.add.text(32, 32).setScrollFactor(0).setFontSize(32).setColor('#ffffff');
 }
 
-function spawnPlayer(game) {
+function spawnPlayer() {
 
   const spriteSheet = {
     key: 'characters',
@@ -33,15 +31,15 @@ function spawnPlayer(game) {
     }
   }
 
-  const player = game.physics.add.sprite(worldSize / 2, worldSize / 2, spriteSheet.key)
+  const player = this.physics.add.sprite(worldSize / 2, worldSize / 2, spriteSheet.key)
     .setScale(2);
 
   player.setCollideWorldBounds(true);
 
   Object.keys(spriteSheet.frames).forEach(direction => {
-    game.anims.create({
+    this.anims.create({
       key: direction,
-      frames: game.anims.generateFrameNumbers(spriteSheet.key, spriteSheet.frames[direction]),
+      frames: this.anims.generateFrameNumbers(spriteSheet.key, spriteSheet.frames[direction]),
       frameRate: 10,
       repeat: -1
     });
@@ -49,3 +47,11 @@ function spawnPlayer(game) {
 
   return player;
 }
+
+
+  // Obstacles
+  // game.grid = generateGrid(worldSize);
+
+  // const numObstacles = Math.floor(game.grid.length * 0.1);
+  // game.obstacles = generateObstacles(this, numObstacles);
+

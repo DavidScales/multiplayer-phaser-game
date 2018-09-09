@@ -11,19 +11,40 @@ function generateGrid(worldSize) {
       }
   }
   return grid;
-  // return shuffle(grid);
 }
 
-function getUniqueRandomLocation() {
-  const gridIndex = 0;
-  const x = this.grid[gridIndex].x;
-  const y = this.grid[gridIndex].y;
-  this.grid.splice(gridIndex, 1);
-  gridIndex++;
-  if (gridIndex === this.grid.length) {
-      this.shuffle(this.grid);
-      gridIndex = 0;
+//
+function getUniqueRandomLocation(game) {
+  const randomIndex = Math.floor(Math.random() * game.grid.length);
+  const location = game.grid[randomIndex];
+  game.grid.splice(randomIndex, 1);
+  return location;
+}
+
+function generateObstacles(game, numObstacles) {
+
+  // const spriteSheet = {
+  //   key: 'misc',
+  //   frames: {
+  //     down: { start: 0, end: 2 },
+  //     left: { start: 12, end: 14 },
+  //     right: { start: 24, end: 26 },
+  //     up: { start: 36, end: 38 },
+  //   }
+  // }
+
+  const obstacles = game.physics.add.staticGroup();
+  for (let i = 0; i < numObstacles; i++) {
+    let location = getUniqueRandomLocation(game.game);
+    // let spriteIndex = Math.floor(Math.random() * 10);
+    generateObstacle(location);
   }
-  return {x, y};
+  return obstacles;
+}
+
+function generateObstacle(location) {
+  game.obstacles.add(location.x, location.y, 'misc');
+
+  // obstacle.anims.play(animation, true);
 }
 
