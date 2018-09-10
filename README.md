@@ -5,13 +5,16 @@ A very simple 2d multiplayer RPG. Created mostly for learning things like
 * databases
 * etc.
 
-Inspired by Phaser.js examples like https://github.com/tlmader/theodoric.
+Inspired by Phaser.js examples like [Theodoric](https://github.com/tlmader/theodoric) and [Browser Quest](https://github.com/mozilla/).
 
 Features
 * (see TODO's)
 
 ### Things to do for real
-* better scoping
+* document with comments
+* use WASD keys
+* auto click on canvas element onload
+* study the scoping / classes / that tricky JS stuff. WRITE IT OUT.
 * abstract into modular files with build (also note build perf stats)
 * loading screen
 * sound effects, music
