@@ -15,8 +15,11 @@ function create() {
   // Controls
   cursors = this.input.keyboard.createCursorKeys();
 
-  // Obstacles
+  // Grid for obstacles, enemies, etc.
   this.randomGrid = this.generateRandomGrid(worldSize);
+  // Enemies
+  this.enemies = this.generateEnemies();
+  // Obstacles
   this.obstacles = this.generateObstacles();
 
   // Text
@@ -91,6 +94,7 @@ function generateObstacles() {
     this.generateObstacle(obstacles, randomLocation, randomSpriteFrame);
   }
   this.physics.add.collider(this.player, obstacles);
+  this.physics.add.collider(this.enemies, obstacles);
   return obstacles;
 }
 
@@ -98,6 +102,62 @@ function generateObstacles() {
 function generateObstacle(obstacles, location, spriteFrame) {
   obstacles.create(location.x, location.y, 'misc', spriteFrame)
     .setScale(2).refreshBody();
+}
+
+//
+function generateEnemies() {
+  // TODO: animation creation in generateEnemies and generatePlayer are really similar, abstract?
+  // TODO: might be better way http://labs.phaser.io/index.html?dir=game%20objects/group/&q=
+
+  const spriteSheet = {
+    key: 'characters',
+    frames: {
+      enemy_down: { start: 9, end: 11 },
+      enemy_left: { start: 21, end: 23 },
+      enemy_right: { start: 33, end: 35 },
+      enemy_up: { start: 45, end: 47 },
+    }
+  }
+
+  Object.keys(spriteSheet.frames).forEach(direction => {
+    this.anims.create({
+      key: direction,
+      frames: this.anims.generateFrameNumbers(spriteSheet.key, spriteSheet.frames[direction]),
+      frameRate: 10,
+      repeat: -1
+    });
+  })
+
+  // TODO: randomGrid will be smaller now after generateObstacles
+  // so these constants should be pulled out before randomGrid is consumed
+  const numEnemies = Math.floor(this.randomGrid.length * 0.01);
+  const enemies = this.physics.add.group();
+  for (let i = 0; i < numEnemies; i++) {
+    let randomLocation = this.randomGrid.pop();
+    this.generateEnemy(enemies, randomLocation);
+  }
+  // TODO: custom callback for damage too
+  // TODO: adding collision detection in the generation functions makes
+  // them depend on the order in which the generation functions run
+  // this.physics.add.collider(enemies, this.obstacles);
+  this.physics.add.collider(enemies, this.player, collideEnemy, null, this);
+  return enemies;
+}
+
+//
+function collideEnemy() {
+  console.log('ouch!');
+}
+
+//
+function generateEnemy(enemies, location) {
+
+  console.log(`generating enemy @ ${location.x}, ${location.y}`);
+
+  enemies.create(location.x, location.y, 'characters')
+    .setScale(2);
+
+    // enemy.setCollideWorldBounds(true); // Do I need this?
 }
 
 

@@ -1,6 +1,7 @@
 function update() {
   this.handlerPlayerMovement();
   this.debug();
+  this.handleEnemies();
 }
 
 function debug() {
@@ -47,5 +48,34 @@ function handlerPlayerMovement() {
     this.player.anims.stop();
     this.player.setVelocity(0, 0);
   }
+}
+
+function handleEnemies() {
+  this.enemies.children.iterate(enemy => {
+    // TODO: could do closeness to player based on enemy vision
+    if (enemy.visible &&
+        Math.abs(enemy.x - this.player.x) < 200 &&
+        Math.abs(enemy.x - this.player.x)) {
+
+      this.physics.moveToObject(enemy, this.player, 100);
+
+      // left
+      if (enemy.body.velocity.x < 0 && enemy.body.velocity.x <= -Math.abs(enemy.body.velocity.y)) {
+        enemy.anims.play('enemy_left', true);
+      }
+      // right
+      else if (enemy.body.velocity.x > 0 && enemy.body.velocity.x >= Math.abs(enemy.body.velocity.y)) {
+        enemy.anims.play('enemy_right', true);
+      }
+      // up
+      else if (enemy.body.velocity.y < 0 && enemy.body.velocity.y <= -Math.abs(enemy.body.velocity.x)) {
+        enemy.anims.play('enemy_up', true);
+      }
+      // down
+      else {
+        enemy.anims.play('enemy_down', true);
+      }
+    }
+  });
 }
 

@@ -13,7 +13,10 @@ const QuestGame = new Phaser.Class({
   debug: debug,
   generateRandomGrid: generateRandomGrid,
   generateObstacle: generateObstacle,
-  generateObstacles: generateObstacles
+  generateObstacles: generateObstacles,
+  generateEnemies: generateEnemies,
+  generateEnemy: generateEnemy,
+  handleEnemies: handleEnemies
 });
 
 const width = 800;
