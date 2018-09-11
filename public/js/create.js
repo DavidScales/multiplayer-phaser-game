@@ -30,6 +30,11 @@ function create() {
   // Obstacles
   this.obstacles = this.generateObstacles(numObstacles);
 
+  // Collisions
+  this.physics.add.collider(this.player, this.obstacles);
+  this.physics.add.collider(this.enemies, this.obstacles);
+  this.physics.add.collider(this.enemies, this.player, collideEnemy, null, this);
+
   // Text
   this.text = this.add.text(32, 32).setScrollFactor(0).setFontSize(32).setColor('#ffffff');
 }
@@ -102,14 +107,11 @@ function generateObstacle(obstacles, location, spriteFrame) {
 function generateObstacles(numObstacles) {
   const obstacles = this.physics.add.staticGroup();
   const tempObstacleFrames = [20, 30, 38, 58]; // TODO: remove magic numbers
-
   for (let i = 0; i < numObstacles; i++) {
     let randomLocation = this.randomGrid.pop();
     let randomSpriteFrame = tempObstacleFrames[Math.floor(Math.random() * tempObstacleFrames.length)];
     this.generateObstacle(obstacles, randomLocation, randomSpriteFrame);
   }
-  this.physics.add.collider(this.player, obstacles);
-  this.physics.add.collider(this.enemies, obstacles);
   return obstacles;
 }
 
@@ -128,10 +130,6 @@ function generateEnemies(numEnemies) {
     let randomLocation = this.randomGrid.pop();
     this.generateEnemy(enemies, randomLocation);
   }
-  // TODO: adding collision detection in the generation functions makes
-  // them depend on the order in which the generation functions run
-  // this.physics.add.collider(enemies, this.obstacles);
-  this.physics.add.collider(enemies, this.player, collideEnemy, null, this);
   return enemies;
 }
 
