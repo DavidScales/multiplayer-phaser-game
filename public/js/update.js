@@ -21,28 +21,28 @@ function move(sprite, animation, xVelocity, yVelocity) {
 function handlerPlayerMovement() {
 
   if (cursors.left.isDown && cursors.up.isDown) {
-    move(this.player, 'left', -160, -160);
+    move(this.player, 'player_left', -160, -160);
   }
   else if (cursors.left.isDown && cursors.down.isDown) {
-    move(this.player, 'left', -160, 160);
+    move(this.player, 'player_left', -160, 160);
   }
   else if (cursors.right.isDown && cursors.up.isDown) {
-    move(this.player, 'right', 160, -160);
+    move(this.player, 'player_right', 160, -160);
   }
   else if (cursors.right.isDown && cursors.down.isDown) {
-    move(this.player, 'right', 160, 160);
+    move(this.player, 'player_right', 160, 160);
   }
   else if (cursors.left.isDown) {
-    move(this.player, 'left', -160, 0);
+    move(this.player, 'player_left', -160, 0);
   }
   else if (cursors.right.isDown) {
-    move(this.player, 'right', 160, 0);
+    move(this.player, 'player_right', 160, 0);
   }
   else if (cursors.up.isDown) {
-    move(this.player, 'up', 0, -160);
+    move(this.player, 'player_up', 0, -160);
   }
   else if (cursors.down.isDown) {
-    move(this.player, 'down',0, 160);
+    move(this.player, 'player_down', 0, 160);
   }
   else {
     this.player.anims.stop();
@@ -59,19 +59,16 @@ function handleEnemies() {
 
       this.physics.moveToObject(enemy, this.player, 100);
 
-      // left
+      // animations
       if (enemy.body.velocity.x < 0 && enemy.body.velocity.x <= -Math.abs(enemy.body.velocity.y)) {
         enemy.anims.play('enemy_left', true);
       }
-      // right
       else if (enemy.body.velocity.x > 0 && enemy.body.velocity.x >= Math.abs(enemy.body.velocity.y)) {
         enemy.anims.play('enemy_right', true);
       }
-      // up
       else if (enemy.body.velocity.y < 0 && enemy.body.velocity.y <= -Math.abs(enemy.body.velocity.x)) {
         enemy.anims.play('enemy_up', true);
       }
-      // down
       else {
         enemy.anims.play('enemy_down', true);
       }

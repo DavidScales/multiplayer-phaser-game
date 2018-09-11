@@ -16,7 +16,8 @@ const QuestGame = new Phaser.Class({
   generateObstacles: generateObstacles,
   generateEnemies: generateEnemies,
   generateEnemy: generateEnemy,
-  handleEnemies: handleEnemies
+  handleEnemies: handleEnemies,
+  createAnimations: createAnimations,
 });
 
 const width = 800;

@@ -8,6 +8,9 @@ function create() {
   this.add.tileSprite(0, 0, worldSize, worldSize, 'misc', 64)
     .setScale(2);
 
+  // Animations
+  this.createAnimations();
+
   // Player
   this.player = this.spawnPlayer();
   this.cameras.main.startFollow(this.player, true);
@@ -26,23 +29,20 @@ function create() {
   this.text = this.add.text(32, 32).setScrollFactor(0).setFontSize(32).setColor('#ffffff');
 }
 
-function spawnPlayer() {
-
+function createAnimations() {
   const spriteSheet = {
     key: 'characters',
     frames: {
-      down: { start: 0, end: 2 },
-      left: { start: 12, end: 14 },
-      right: { start: 24, end: 26 },
-      up: { start: 36, end: 38 },
+      player_down: { start: 0, end: 2 },
+      player_left: { start: 12, end: 14 },
+      player_right: { start: 24, end: 26 },
+      player_up: { start: 36, end: 38 },
+      enemy_down: { start: 9, end: 11 },
+      enemy_left: { start: 21, end: 23 },
+      enemy_right: { start: 33, end: 35 },
+      enemy_up: { start: 45, end: 47 },
     }
   }
-
-  const player = this.physics.add.sprite(worldSize / 2, worldSize / 2, spriteSheet.key)
-    .setScale(2);
-
-  player.setCollideWorldBounds(true);
-
   Object.keys(spriteSheet.frames).forEach(direction => {
     this.anims.create({
       key: direction,
@@ -51,7 +51,12 @@ function spawnPlayer() {
       repeat: -1
     });
   })
+}
 
+function spawnPlayer() {
+  const player = this.physics.add.sprite(worldSize / 2, worldSize / 2, 'characters')
+    .setScale(2);
+  player.setCollideWorldBounds(true);
   return player;
 }
 
@@ -83,6 +88,12 @@ function generateRandomGrid(worldSize) {
 }
 
 //
+function generateObstacle(obstacles, location, spriteFrame) {
+  obstacles.create(location.x, location.y, 'misc', spriteFrame)
+    .setScale(2).refreshBody();
+}
+
+//
 function generateObstacles() {
   const numObstacles = Math.floor(this.randomGrid.length * 0.05);
   const obstacles = this.physics.add.staticGroup();
@@ -99,34 +110,15 @@ function generateObstacles() {
 }
 
 //
-function generateObstacle(obstacles, location, spriteFrame) {
-  obstacles.create(location.x, location.y, 'misc', spriteFrame)
-    .setScale(2).refreshBody();
+function generateEnemy(enemies, location) {
+  console.log(`generating enemy @ ${location.x}, ${location.y}`);
+  enemies.create(location.x, location.y, 'characters')
+    .setScale(2);
+  // enemies.setCollideWorldBounds(true); // TODO: Do I need this?
 }
 
 //
 function generateEnemies() {
-  // TODO: animation creation in generateEnemies and generatePlayer are really similar, abstract?
-  // TODO: might be better way http://labs.phaser.io/index.html?dir=game%20objects/group/&q=
-
-  const spriteSheet = {
-    key: 'characters',
-    frames: {
-      enemy_down: { start: 9, end: 11 },
-      enemy_left: { start: 21, end: 23 },
-      enemy_right: { start: 33, end: 35 },
-      enemy_up: { start: 45, end: 47 },
-    }
-  }
-
-  Object.keys(spriteSheet.frames).forEach(direction => {
-    this.anims.create({
-      key: direction,
-      frames: this.anims.generateFrameNumbers(spriteSheet.key, spriteSheet.frames[direction]),
-      frameRate: 10,
-      repeat: -1
-    });
-  })
 
   // TODO: randomGrid will be smaller now after generateObstacles
   // so these constants should be pulled out before randomGrid is consumed
@@ -149,16 +141,6 @@ function collideEnemy() {
   console.log('ouch!');
 }
 
-//
-function generateEnemy(enemies, location) {
-
-  console.log(`generating enemy @ ${location.x}, ${location.y}`);
-
-  enemies.create(location.x, location.y, 'characters')
-    .setScale(2);
-
-    // enemy.setCollideWorldBounds(true); // Do I need this?
-}
 
 
 
