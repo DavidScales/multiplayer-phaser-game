@@ -97,7 +97,7 @@ function generateObstacle(obstacles, location, spriteFrame) {
 function generateObstacles() {
   const numObstacles = Math.floor(this.randomGrid.length * 0.05);
   const obstacles = this.physics.add.staticGroup();
-  const tempObstacleFrames = [20, 30, 38, 58]; // TODO:
+  const tempObstacleFrames = [20, 30, 38, 58]; // TODO: remove magic numbers
 
   for (let i = 0; i < numObstacles; i++) {
     let randomLocation = this.randomGrid.pop();
@@ -119,7 +119,6 @@ function generateEnemy(enemies, location) {
 
 //
 function generateEnemies() {
-
   // TODO: randomGrid will be smaller now after generateObstacles
   // so these constants should be pulled out before randomGrid is consumed
   const numEnemies = Math.floor(this.randomGrid.length * 0.01);
@@ -128,7 +127,6 @@ function generateEnemies() {
     let randomLocation = this.randomGrid.pop();
     this.generateEnemy(enemies, randomLocation);
   }
-  // TODO: custom callback for damage too
   // TODO: adding collision detection in the generation functions makes
   // them depend on the order in which the generation functions run
   // this.physics.add.collider(enemies, this.obstacles);

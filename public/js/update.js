@@ -19,7 +19,7 @@ function move(sprite, animation, xVelocity, yVelocity) {
 }
 
 function handlerPlayerMovement() {
-
+  // TODO: movement should of course be based on player speed
   if (cursors.left.isDown && cursors.up.isDown) {
     move(this.player, 'player_left', -160, -160);
   }

@@ -1,8 +1,5 @@
 function preload() {
-  this.load.image('ship', 'assets/spaceShips_001.png');
-  this.load.image('enemy', 'assets/enemy.png');
-  this.load.image('star', 'assets/star_gold.png');
-
+  // TODO: update sprite sheets
   this.load.spritesheet('characters', 'assets/temp_characters.png', {
     frameWidth: 16, frameHeight: 16
   });
