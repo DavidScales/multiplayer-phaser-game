@@ -18,12 +18,17 @@ function create() {
   // Controls
   cursors = this.input.keyboard.createCursorKeys();
 
-  // Grid for obstacles, enemies, etc.
+  // Grid & constants for obstacles, enemies, etc.
+  /* */
   this.randomGrid = this.generateRandomGrid(worldSize);
+  const numObstacles = Math.floor(this.randomGrid.length * 0.05); // 5% of tiles
+  const numEnemies = Math.floor(this.randomGrid.length * 0.01); // 1% of tiles
+
   // Enemies
-  this.enemies = this.generateEnemies();
+  this.enemies = this.generateEnemies(numEnemies);
+
   // Obstacles
-  this.obstacles = this.generateObstacles();
+  this.obstacles = this.generateObstacles(numObstacles);
 
   // Text
   this.text = this.add.text(32, 32).setScrollFactor(0).setFontSize(32).setColor('#ffffff');
@@ -72,7 +77,7 @@ function shuffle(array) {
   return array;
 }
 
-//
+/* */
 function generateRandomGrid(worldSize) {
   const grid = [];
   const gridUnitSize = 32;
@@ -94,8 +99,7 @@ function generateObstacle(obstacles, location, spriteFrame) {
 }
 
 //
-function generateObstacles() {
-  const numObstacles = Math.floor(this.randomGrid.length * 0.05);
+function generateObstacles(numObstacles) {
   const obstacles = this.physics.add.staticGroup();
   const tempObstacleFrames = [20, 30, 38, 58]; // TODO: remove magic numbers
 
@@ -118,10 +122,7 @@ function generateEnemy(enemies, location) {
 }
 
 //
-function generateEnemies() {
-  // TODO: randomGrid will be smaller now after generateObstacles
-  // so these constants should be pulled out before randomGrid is consumed
-  const numEnemies = Math.floor(this.randomGrid.length * 0.01);
+function generateEnemies(numEnemies) {
   const enemies = this.physics.add.group();
   for (let i = 0; i < numEnemies; i++) {
     let randomLocation = this.randomGrid.pop();
