@@ -11,9 +11,9 @@ Features
 * (see TODO's)
 
 ### Things to do for real
-* document with comments
+* document with comments, at least non-obvious functions
 * use WASD keys
-* auto click on canvas element onload
+* X auto click on canvas element onload --> actually don't do this. it hijacks the user control. There will be a loading page / start button anyways
 * study the scoping / classes / that tricky JS stuff. WRITE IT OUT.
 * abstract into modular files with build (also note build perf stats)
 * loading screen

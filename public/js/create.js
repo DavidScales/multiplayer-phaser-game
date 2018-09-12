@@ -30,6 +30,9 @@ function create() {
   // Obstacles
   this.obstacles = this.generateObstacles(numObstacles);
 
+  // generateMeleeAttacks
+  this.meleeAttacks = this.physics.add.group();
+
   // Collisions
   this.physics.add.collider(this.player, this.obstacles);
   this.physics.add.collider(this.enemies, this.obstacles);
@@ -117,7 +120,7 @@ function generateObstacles(numObstacles) {
 
 //
 function generateEnemy(enemies, location) {
-  console.log(`generating enemy @ ${location.x}, ${location.y}`);
+  // console.log(`generating enemy @ ${location.x}, ${location.y}`);
   enemies.create(location.x, location.y, 'characters')
     .setScale(2);
   // enemies.setCollideWorldBounds(true); // TODO: Do I need this?
