@@ -1,0 +1,23 @@
+{
+  "name": "multiplayer-phaser-game",
+  "version": "0.1.0",
+  "description": "todo",
+  "main": "app.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/DavidScales/multiplayer-phaser-game.git"
+  },
+  "author": "davidscales",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/DavidScales/multiplayer-phaser-game/issues"
+  },
+  "homepage": "https://github.com/DavidScales/multiplayer-phaser-game#readme",
+  "dependencies": {
+    "express": "^4.16.3",
+    "socket.io": "^2.1.1"
+  }
+}
