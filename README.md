@@ -9,6 +9,9 @@
 ### episode 4
 * keyboard controls
 
+### episode 5
+* bullets
+
 
 ## Notes
 
@@ -325,6 +328,11 @@ const Player = id => {
 
   return self;
 };
+
+from here is mostly more of the same to add more objects and events to the game, like bullets that the player can shoot or obstacles they can run into, etc.
+
+
+
 
 NOTE: possibly add notes about the socket vs client session issues I had with Nick
 
