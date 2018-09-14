@@ -1,12 +1,13 @@
 ### episode 1
-
 * set up project file structure
 * install express, socket.io
 * configure server app.js to hello-world level using express
 
 ### episode 2 & 3
-
 * basic web sockets and socket.io API
+
+### episode 4
+* keyboard controls
 
 
 ## Notes
@@ -216,6 +217,114 @@ On the client I could listen for this event and do a thing
       }
     });
 
+
+UPDATED EXAMPLE:
+
+on the client, listen for keyup & keydown events, and send those as keyPress socket events to the server
+
+    document.onkeydown = event => {
+      if (event.keyCode === 68) { // d key
+        socket.emit('keyPress', { inputId: 'right', state: true });
+      }
+      else if (event.keyCode === 83) { // s key
+        socket.emit('keyPress', { inputId: 'down', state: true });
+      }
+      else if (event.keyCode === 65) { // a key
+        socket.emit('keyPress', { inputId: 'left', state: true });
+      }
+      else if (event.keyCode === 87) { // w key
+        socket.emit('keyPress', { inputId: 'up', state: true });
+      }
+    };
+
+    document.onkeyup = event => {
+      if (event.keyCode === 68) { // d key
+        socket.emit('keyPress', { inputId: 'right', state: false });
+      }
+      else if (event.keyCode === 83) { // s key
+        socket.emit('keyPress', { inputId: 'down', state: false });
+      }
+      else if (event.keyCode === 65) { // a key
+        socket.emit('keyPress', { inputId: 'left', state: false });
+      }
+      else if (event.keyCode === 87) { // w key
+        socket.emit('keyPress', { inputId: 'up', state: false });
+      }
+    };
+
+these keyPress events are heard on the server by a new listener, and used to modify the "state" of the keys for each player.
+
+io.sockets.on('connection', socket => {
+  //...
+
+  socket.on('keyPress', data => {
+    if (data.inputId === 'left') {
+      player.pressingLeft = data.state;
+    }
+    else if (data.inputId === 'right') {
+      player.pressingRight = data.state;
+    }
+    else if (data.inputId === 'up') {
+      player.pressingUp = data.state;
+    }
+    else if (data.inputId === 'down') {
+      player.pressingDown = data.state;
+    }
+  });
+});
+
+Then in the "game loop", each players position is updated before being sent out to all the clients like before
+
+setInterval(() => {
+  let pack = [];
+  for (let i in PLAYER_LIST) {
+    let player = PLAYER_LIST[i];
+    player.updatePosition(); // NEW THING
+    pack.push({
+      x: player.x,
+      y: player.y,
+      number: player.number
+    });
+  }
+  for (let i in SOCKET_LIST) {
+    let socket = SOCKET_LIST[i];
+    socket.emit('newPosition', pack);
+  }
+
+}, 1000/25); // 25 FPS
+
+using the new Player objects updatePosition method
+
+const Player = id => {
+  const self = {
+    x: 250,
+    y: 250,
+    id:id,
+    number: "" + Math.floor(10 * Math.random()),
+    pressingRight: false,
+    pressingLeft: false,
+    pressingUp: false,
+    pressingDown: false,
+    maxSpeed: 10,
+  }
+
+  self.updatePosition = () => {
+    if (self.pressingRight) {
+      self.x += self.maxSpeed;
+    }
+    if (self.pressingLeft) {
+      self.x -= self.maxSpeed;
+    }
+    if (self.pressingDown) {
+      self.y += self.maxSpeed;
+    }
+    if (self.pressingUp) {
+      self.y -= self.maxSpeed;
+    }
+  };
+
+  return self;
+};
 
 NOTE: possibly add notes about the socket vs client session issues I had with Nick
 

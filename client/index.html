@@ -29,6 +29,36 @@
         ctx.fillText(player.number, player.x, player.y);
       }
     });
+
+    document.onkeydown = event => {
+      if (event.keyCode === 68) { // d key
+        socket.emit('keyPress', { inputId: 'right', state: true });
+      }
+      else if (event.keyCode === 83) { // s key
+        socket.emit('keyPress', { inputId: 'down', state: true });
+      }
+      else if (event.keyCode === 65) { // a key
+        socket.emit('keyPress', { inputId: 'left', state: true });
+      }
+      else if (event.keyCode === 87) { // w key
+        socket.emit('keyPress', { inputId: 'up', state: true });
+      }
+    };
+
+    document.onkeyup = event => {
+      if (event.keyCode === 68) { // d key
+        socket.emit('keyPress', { inputId: 'right', state: false });
+      }
+      else if (event.keyCode === 83) { // s key
+        socket.emit('keyPress', { inputId: 'down', state: false });
+      }
+      else if (event.keyCode === 65) { // a key
+        socket.emit('keyPress', { inputId: 'left', state: false });
+      }
+      else if (event.keyCode === 87) { // w key
+        socket.emit('keyPress', { inputId: 'up', state: false });
+      }
+    };
   </script>
 </body>
 </html>
