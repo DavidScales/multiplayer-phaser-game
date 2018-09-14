@@ -10,5 +10,25 @@
 </head>
 <body>
   <h1>Title</h1>
+  <canvas id="ctx" width="500" height="500" style="border:1px solid #000;"></canvas>
+  <script src="/socket.io/socket.io.js"></script>
+  <script>
+    const ctx = document.getElementById("ctx").getContext("2d");
+    ctx.font = '30px Arial';
+
+    const socket = io();
+
+    socket.on('newPosition', data => {
+      console.log('newPosition');
+      console.log(data);
+      ctx.clearRect(0, 0, 500, 500);
+      for (let i = 0; i < data.length; i++) {
+        let player = data[i];
+        console.log('player');
+        console.log(player);
+        ctx.fillText(player.number, player.x, player.y);
+      }
+    });
+  </script>
 </body>
 </html>

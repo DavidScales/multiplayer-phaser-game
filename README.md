@@ -3,3 +3,221 @@
 * set up project file structure
 * install express, socket.io
 * configure server app.js to hello-world level using express
+
+### episode 2 & 3
+
+* basic web sockets and socket.io API
+
+
+## Notes
+
+Want to create a "real time" (is that the right term?)
+
+Learning to use websockets
+
+> The WebSocket API is an advanced technology that makes it possible to open a two-way interactive communication session between the user's browser and a server. With this API, you can send messages to a server and receive event-driven responses without having to poll the server for a reply.
+https://developer.mozilla.org/en-US/docs/Web/API/WebSockets_API
+
+because its faster... esp for games, chat apps, no need to poll/re-establish...
+
+Using Socket.IO, which is
+
+> a library that enables real-time, bidirectional and event-based communication between the browser and the server.
+https://socket.io/docs/
+
+using the underlying browser WebSockets API.
+
+First I got started with a very basic (hello-world) express app:
+
+```
+const express = require('express');
+const app = express();
+const server = require('http').Server(app);
+const port = 8087;
+
+app.get('/', (req, res) => {
+  res.sendFile(`${__dirname}/client/index.html`);
+})
+app.use('/client', express.static(`${__dirname}/client`));
+
+console.log(`Server listening on localhost:${port}`);
+server.listen(port);
+```
+
+One thing that I found interesting is that I normally set up express servers with the following:
+
+```
+const express = require('express');
+const app = express();
+app.listen(port);
+```
+
+Which I had never actually bothered to understand. But the [Socket.IO docs](https://socket.io/docs/) describe creating the example express server with Node's http module, before eventually incorporating the socket.io module itself:
+
+```
+var app = require('express')();
+var server = require('http').Server(app);
+var io = require('socket.io')(server);
+```
+https://socket.io/docs/
+
+After an unsuccessful search of the documentation I found a stack overflow https://stackoverflow.com/questions/17696801/express-js-app-listen-vs-server-listen
+
+explaining that the express instantiation
+
+const express = require('express');
+const app = express();
+
+or shorthand
+
+```
+var app = require('express')();
+```
+
+simply creates a function that an http (or https) server can use as a callback for handling requests.
+
+> The app returned by express() is in fact a JavaScript Function, designed to be passed to Node’s HTTP servers as a callback to handle requests. This makes it easy to provide both HTTP and HTTPS versions of your app with the same code base, as the app does not inherit from these (it is simply a callback)
+https://expressjs.com/en/api.html#app.listen
+
+so an http (or https) server still needs to be created, with the express app used as its request handling function. In the socket.io docs, this happens here:
+
+var server = require('http').Server(app);
+
+Where the express app is passed into the http Server instantiation. But it less obvious in the typical express setup, where
+
+app.listen(port);
+
+implicitly creates and returns an http.Server object, and is just shorthand for
+
+app.listen = function() {
+  var server = http.createServer(this);
+  return server.listen.apply(server, arguments);
+};
+https://expressjs.com/en/api.html#app.listen
+
+The socket.io docs recommend the explicit technique because the socket.io library needs to access the http.Server object like this
+
+var io = require('socket.io')(server);
+
+Of course, since I now know that app.listen returns the server instance, the socket.io docs code could be re-written to look more like the express docs:
+
+var express   = require('express');
+var app       = express();
+// app.use/routes/etc...
+var server    = app.listen(3033);
+var io        = require('socket.io').listen(server);
+
+WAIT THIS LAST LINE IS STILL DIFFERENT. WHY NOT JUST
+require('socket.io')(server)?
+
+In my case I finish the express server:
+
+```
+const port = 8087;
+
+app.get('/', (req, res) => {
+  res.sendFile(`${__dirname}/client/index.html`);
+})
+app.use('/client', express.static(`${__dirname}/client`));
+
+console.log(`Server listening on localhost:${port}`);
+server.listen(port);
+```
+
+which just listens on a port, working like a static file server for the files in client/
+
+
+Before instantiting the socket.io module like so:
+
+```
+const io = require('socket.io')(server, {});
+```
+REMOVE THIS EMPTY OPTIONS OBJECT
+
+Which i believe creates a new WebSocket server. So overall I have
+* an http express server handles serving files and the initial client-server handshake process
+* a websocket server that handles data passed through websocket events
+
+heres what that looks like in server code example
+
+io.sockets.on('connection', socket => {
+  console.log('socket connection');
+});
+
+basically use the library to establish a listener for connection events, which will happen when a client (browser) requests /. The express server will serve index.html and then the socket server will take over and establish a connection.
+
+socket.io also has a client lib to abstract socket connections & events on the client side. here's how that looks
+
+import
+<script src="/socket.io/socket.io.js"></script>
+this script call got me for a second because I don't have a socket.io/socket.io.js file on my server, but of course the socket.io library must establish /socket.io/socket.io.js as a route & serve the appropriate client library to it.
+
+instantiate lib
+    const socket = io();
+
+listen for arbitrary events
+
+    socket.on('someEvent', data => {
+      console.log(data);
+    });
+
+Thats pretty much it conceptually for the basics.
+
+The CURRENT example use is that on each connection, create some random data associated with the connection (like representing the coordinates of a player in a game), and to keep track of the connections in a global object.
+
+  const SOCKET_LIST = {};
+  io.sockets.on('connection', socket => {
+
+    socket.id = Math.random();
+    socket.number = "" + Math.floor(10 * Math.random());
+    socket.x = 0;
+    socket.y = 0;
+    SOCKET_LIST[socket.id] = socket;
+
+    console.log(`socket connection, id: ${socket.id}`);
+
+    socket.on('disconnect', () => {
+      delete SOCKET_LIST[socket.id];
+    });
+  });
+
+Then I loop over the connections at some interval, and emit the data...
+
+setInterval(() => {
+  let pack = [];
+  for (let i in SOCKET_LIST) {
+    let socket = SOCKET_LIST[i];
+    socket.x++;
+    socket.y++
+    pack.push({
+      x: socket.x,
+      y: socket.y,
+      number: socket.number
+    });
+  }
+  for (let i in SOCKET_LIST) {
+    let socket = SOCKET_LIST[i];
+    socket.emit('newPosition', pack);
+  }
+
+}, 1000/25); // 25 FPS
+
+On the client I could listen for this event and do a thing
+
+    socket.on('newPosition', data => {
+      console.log('newPosition');
+      console.log(data);
+      ctx.clearRect(0, 0, 500, 500);
+      for (let i = 0; i < data.length; i++) {
+        let player = data[i];
+        console.log('player');
+        console.log(player);
+        ctx.fillText(player.number, player.x, player.y);
+      }
+    });
+
+
+NOTE: possibly add notes about the socket vs client session issues I had with Nick
+
+Ridiculously good tutorial covering multiplayer web games with Node.js & Socket.IO for anyone with even basic-intermediate web/JS experience
+https://rainingchain.com/tutorial/nodejs
