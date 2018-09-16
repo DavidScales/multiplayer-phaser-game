@@ -44,10 +44,10 @@ const Player = id => {
   self.pressingDown = false;
   self.maxSpeed = 10;
 
-  const super_update = self.update;
+  const superUpdate = self.update;
   self.update = () => {
     self.updateSpeed();
-    super_update();
+    superUpdate();
   };
 
   self.updateSpeed = () => {
@@ -110,6 +110,42 @@ Player.update = () => {
   return pack;
 };
 
+const Bullet = angle => {
+  const self = Entity();
+  self.id = Math.random();
+  self.speedX = Math.cos(angle / 180 * Math.PI) * 10;
+  self.speedY = Math.sin(angle / 180 * Math.PI) * 10;
+  self.timer = 0;
+  self.toRemove = false;
+  const superUpdate = self.update;
+  self.update = () => {
+    if (self.timer++ > 100) {
+      self.toRemove = true;
+    }
+    superUpdate();
+  };
+  Bullet.list[self.id] = self;
+  return self;
+};
+Bullet.list = {};
+Bullet.update = () => {
+
+  if (Math.random() < 0.1) {
+    Bullet(Math.random()*360);
+  }
+
+  const pack = [];
+  for (let i in Bullet.list) {
+    let bullet = Bullet.list[i];
+    bullet.update();
+    pack.push({
+      x: bullet.x,
+      y: bullet.y,
+    });
+  }
+  return pack;
+};
+
 const io = require('socket.io')(server, {});
 io.sockets.on('connection', socket => {
   socket.id = Math.random();
@@ -124,9 +160,12 @@ io.sockets.on('connection', socket => {
 });
 
 setInterval(() => {
-  const pack = Player.update();
+  const pack = {
+    players: Player.update(),
+    bullets: Bullet.update(),
+  };
   for (let i in SOCKET_LIST) {
     let socket = SOCKET_LIST[i];
-    socket.emit('newPosition', pack);
+    socket.emit('newPositions', pack);
   }
 }, 1000/25); // 25 FPS
