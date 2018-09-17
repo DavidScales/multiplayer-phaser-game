@@ -11,6 +11,14 @@
 <body>
   <h1>Title</h1>
   <canvas id="ctx" width="500" height="500" style="border:1px solid #000;"></canvas>
+
+  <div id="chat-text" style="width: 500px; height: 100px; overflow-y: scroll">
+    <div>Hello!</div>
+  </div>
+  <form id="chat-form" action="">
+    <input id="chat-input" type="text" style="width: 500px;">
+  </form>
+
   <script src="/socket.io/socket.io.js"></script>
   <script>
     const ctx = document.getElementById("ctx").getContext("2d");
@@ -59,6 +67,19 @@
         socket.emit('keyPress', { inputId: 'up', state: false });
       }
     };
+
+    const chatText = document.getElementById('chat-text');
+    const chatInput = document.getElementById('chat-input');
+    const chatForm = document.getElementById('chat-form');
+    socket.on('addToChat', data => {
+      // THIS BETTER BE SANITIZED :O
+      chatText.innerHTML += '<div>' + data + '</div>';
+    });
+    chatForm.onsubmit = event => {
+      event.preventDefault();
+      socket.emit('sendMsgToServer', chatInput.value);
+    };
+
   </script>
 </body>
 </html>

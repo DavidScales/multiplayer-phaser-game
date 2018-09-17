@@ -331,6 +331,46 @@ const Player = id => {
 
 from here is mostly more of the same to add more objects and events to the game, like bullets that the player can shoot or obstacles they can run into, etc.
 
+### adding chat using sockets
+
+pretty easy, just like the above game type stuff
+
+on the client
+add a UI
+
+  <div id="chat-text" style="width: 500px; height: 100px; overflow-y: scroll">
+    <div>Hello!</div>
+  </div>
+  <form id="chat-form" action="">
+    <input id="chat-input" type="text" style="width: 500px;">
+  </form>
+
+then emit message events on button clicks...
+show messages on recieve event...
+
+    const chatText = document.getElementById('chat-text');
+    const chatInput = document.getElementById('chat-input');
+    const chatForm = document.getElementById('chat-form');
+    socket.on('addToChat', data => {
+      // THIS BETTER BE SANITIZED :O
+      chatText.innerHTML += '<div>' + data + '</div>';
+    });
+    chatForm.onsubmit = event => {
+      event.preventDefault();
+      socket.emit('sendMsgToServer', chatInput.value);
+    };
+
+in server similar, when get message, send to all clients
+
+  socket.on('sendMsgToServer', data => {
+    const playerName = ("" + socket.id).slice(2,7);
+    for (let i in SOCKET_LIST) {
+      let socket = SOCKET_LIST[i];
+      socket.emit('addToChat', `${playerName}: ${data}`);
+    }
+  });
+
+just using socket id as id for example.
 
 
 

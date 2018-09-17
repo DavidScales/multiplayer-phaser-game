@@ -153,6 +153,14 @@ io.sockets.on('connection', socket => {
   console.log(`socket connection, id: ${socket.id}`);
   Player.onConnect(socket);
 
+  socket.on('sendMsgToServer', data => {
+    const playerName = ("" + socket.id).slice(2,7);
+    for (let i in SOCKET_LIST) {
+      let socket = SOCKET_LIST[i];
+      socket.emit('addToChat', `${playerName}: ${data}`);
+    }
+  });
+
   socket.on('disconnect', () => {
     delete SOCKET_LIST[socket.id];
     Player.onDisconnect(socket);
