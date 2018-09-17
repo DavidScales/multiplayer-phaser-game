@@ -12,6 +12,9 @@
 ### episode 5
 * bullets
 
+### episode 6
+* chat
+* debug server
 
 ## Notes
 
@@ -372,6 +375,45 @@ in server similar, when get message, send to all clients
 
 just using socket id as id for example.
 
+
+### debug server
+
+pretty cool! modify client side chat so that a message starting with "/" is emits a new event with the remaining characters to be evaluated on the server:
+
+    chatForm.onsubmit = event => {
+      event.preventDefault();
+      if (chatInput.value[0] === '/') {
+        socket.emit('evalServer', chatInput.value.slice(1));
+      } else {
+        socket.emit('sendMsgToServer', chatInput.value);
+      }
+    };
+
+Then the server listens for this event and directly evalutes the content
+
+    const DEBUG = true;
+    socket.on('evalServer', data => {
+      if (!DEBUG) {
+        // Letting arbitrary content from the client execute with eval
+        // is super dangerous, so the DEBUG variable is used to prevent
+        // execution in production
+        return;
+      }
+      const res = eval(data);
+      socket.emit('evalAnswer', res);
+    });
+
+and emits it back to the client, which listens and gets the response and logs it
+
+    socket.on('evalAnswer', data => {
+      console.log(data);
+    });
+
+This lets me check the values on the server easily and dynamically, rather that like putting lots of console logs everywhere in the server that log constantly
+
+example - in chat on client i could type "/Player.list", which would evalutate the player list on the server and log it for me in the client.
+
+Sidenote & shown above about security risk of executing arbitrary content from the client - use DEBUG variable.
 
 
 NOTE: possibly add notes about the socket vs client session issues I had with Nick

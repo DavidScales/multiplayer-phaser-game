@@ -146,6 +146,8 @@ Bullet.update = () => {
   return pack;
 };
 
+const DEBUG = true;
+
 const io = require('socket.io')(server, {});
 io.sockets.on('connection', socket => {
   socket.id = Math.random();
@@ -159,6 +161,17 @@ io.sockets.on('connection', socket => {
       let socket = SOCKET_LIST[i];
       socket.emit('addToChat', `${playerName}: ${data}`);
     }
+  });
+
+  socket.on('evalServer', data => {
+    if (!DEBUG) {
+      // Letting arbitrary content from the client execute with eval
+      // is super dangerous, so the DEBUG variable is used to prevent
+      // execution in production
+      return;
+    }
+    const res = eval(data);
+    socket.emit('evalAnswer', res);
   });
 
   socket.on('disconnect', () => {
