@@ -31,6 +31,10 @@ const Entity = () => {
     self.y += self.speedY;
   };
 
+  self.getDistance = point => {
+    return Math.sqrt(Math.pow(self.x - point.x, 2) + Math.pow(self.y - point.y, 2));
+  };
+
   return self;
 };
 
@@ -42,12 +46,24 @@ const Player = id => {
   self.pressingLeft = false;
   self.pressingUp = false;
   self.pressingDown = false;
+  self.pressingAttack = false;
+  self.mouseAngle = 0;
   self.maxSpeed = 10;
 
   const superUpdate = self.update;
   self.update = () => {
     self.updateSpeed();
     superUpdate();
+
+    if (self.pressingAttack) {
+      self.shootBullet(self.mouseAngle);
+    }
+  };
+
+  self.shootBullet = (angle) => {
+    const bullet = Bullet(self.id, angle);
+    bullet.x = self.x;
+    bullet.y = self.y;
   };
 
   self.updateSpeed = () => {
@@ -91,6 +107,12 @@ Player.onConnect = socket => {
     else if (data.inputId === 'down') {
       player.pressingDown = data.state;
     }
+    else if (data.inputId === 'attack') {
+      player.pressingAttack = data.state;
+    }
+    else if (data.inputId === 'mouseAngle') {
+      player.mouseAngle = data.state;
+    }
   });
 };
 Player.onDisconnect = socket => {
@@ -110,12 +132,13 @@ Player.update = () => {
   return pack;
 };
 
-const Bullet = angle => {
+const Bullet = (parent, angle) => {
   const self = Entity();
   self.id = Math.random();
   self.speedX = Math.cos(angle / 180 * Math.PI) * 10;
   self.speedY = Math.sin(angle / 180 * Math.PI) * 10;
   self.timer = 0;
+  self.parent = parent;
   self.toRemove = false;
   const superUpdate = self.update;
   self.update = () => {
@@ -123,25 +146,32 @@ const Bullet = angle => {
       self.toRemove = true;
     }
     superUpdate();
+
+    for (let i in Player.list) {
+      let player = Player.list[i];
+      if (self.getDistance(player) < 32 && self.parent !== player.id) {
+        // TODO handle collision damage
+        self.toRemove = true;
+      }
+    }
   };
   Bullet.list[self.id] = self;
   return self;
 };
 Bullet.list = {};
 Bullet.update = () => {
-
-  if (Math.random() < 0.1) {
-    Bullet(Math.random()*360);
-  }
-
   const pack = [];
   for (let i in Bullet.list) {
     let bullet = Bullet.list[i];
     bullet.update();
-    pack.push({
-      x: bullet.x,
-      y: bullet.y,
-    });
+    if (bullet.toRemove) {
+      delete Bullet.list[i];
+    } else {
+      pack.push({
+        x: bullet.x,
+        y: bullet.y,
+      });
+    }
   }
   return pack;
 };

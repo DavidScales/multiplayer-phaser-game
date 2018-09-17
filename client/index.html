@@ -9,7 +9,7 @@
   <!-- <script src="main.js"></script> -->
 </head>
 <body>
-  <h1>Title</h1>
+  <!-- <h1>Title</h1> -->
   <canvas id="ctx" width="500" height="500" style="border:1px solid #000;"></canvas>
 
   <div id="chat-text" style="width: 500px; height: 100px; overflow-y: scroll">
@@ -66,6 +66,19 @@
       else if (event.keyCode === 87) { // w key
         socket.emit('keyPress', { inputId: 'up', state: false });
       }
+    };
+
+    document.onmousedown = event => {
+      socket.emit('keyPress', { inputId: 'attack', state: true });
+    };
+    document.onmouseup = event => {
+      socket.emit('keyPress', { inputId: 'attack', state: false });
+    };
+    document.onmousemove = event => {
+      const x = -250 + event.clientX - 8;
+      const y = -250 + event.clientY - 8;
+      const angle = Math.atan2(y, x) / Math.PI * 180;
+      socket.emit('keyPress', { inputId: 'mouseAngle', state: angle });
     };
 
     const chatText = document.getElementById('chat-text');
