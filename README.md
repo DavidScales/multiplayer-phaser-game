@@ -415,6 +415,79 @@ example - in chat on client i could type "/Player.list", which would evalutate t
 
 Sidenote & shown above about security risk of executing arbitrary content from the client - use DEBUG variable.
 
+### auth
+
+can use websockets for auth as well, e.g. use socket events for sign-in/sign-up instead of the normal http post requests:
+
+  socket.on('signIn', data => {
+    if (isValidUser(data)) {
+      Player.onConnect(socket);
+      socket.emit('signInResponse', { success: true });
+    } else {
+      socket.emit('signInResponse', { success: false });
+    }
+  });
+
+where isValidUser is something basic and sync like
+
+  function isValidUser(data) {
+    return USERS[data.username] === data.password;
+  };
+
+for real code tho, gonna be checking a DB, which is async, so this isn't going to work of course. the tutorial recommends callbacks like this:
+
+  socket.on('signIn', data => {
+    isValidUser(data, res => {
+      if (res) {
+        Player.onConnect(socket);
+        socket.emit('signInResponse', { success: true });
+      } else {
+        socket.emit('signInResponse', { success: false });
+      }
+    });
+  });
+
+along with rewriting isValidUser to something like:
+
+  function isValidUser(data, cb) {
+    // async user lookup
+    cb(user && user.password === data.password);
+  };
+
+but with Promises + async/await! even bettuh!
+
+  async function isValidUser(data) {
+    return new Promise((resolve, reject) => {
+      // async user lookup
+      resolve(user && user.password === data.password);
+    });
+  };
+
+  socket.on('signIn', async data => {
+    if (await isValidUser(data)) {
+      Player.onConnect(socket);
+      socket.emit('signInResponse', { success: true });
+    } else {
+      socket.emit('signInResponse', { success: false });
+    }
+  });
+
+...etc. explain
+
+also alt with fat arrows because I like those:
+
+  const isValidUser = async data => {
+    return new Promise((resolve, reject) => {
+      // async user lookup
+      resolve(user && user.password === data.password);
+    });
+  };
+
+TODO: come back to the above post-DB
+
+### user persistence with databases
+
+
 
 NOTE: possibly add notes about the socket vs client session issues I had with Nick
 

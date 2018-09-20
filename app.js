@@ -178,12 +178,45 @@ Bullet.update = () => {
 
 const DEBUG = true;
 
+// TODO: sanitization and potential security issues
+const USERS = {
+  // username: password
+  'admin': 'password',
+  'david': 'isCool',
+};
+const isValidUser = async data => {
+  return USERS[data.username] === data.password;
+};
+const isUsernameTaken = async data => {
+  return USERS[data.username];
+};
+const addUser = async data => {
+  USERS[data.username] = data.password;
+};
+
 const io = require('socket.io')(server, {});
 io.sockets.on('connection', socket => {
   socket.id = Math.random();
   SOCKET_LIST[socket.id] = socket;
   console.log(`socket connection, id: ${socket.id}`);
-  Player.onConnect(socket);
+
+  socket.on('signIn', async data => {
+    if (await isValidUser(data)) {
+      Player.onConnect(socket);
+      socket.emit('signInResponse', { success: true });
+    } else {
+      socket.emit('signInResponse', { success: false });
+    }
+  });
+
+  socket.on('signUp', async data => {
+    if (await isUsernameTaken(data)) {
+      socket.emit('signUpResponse', { success: false });
+    } else {
+      await addUser(data);
+      socket.emit('signUpResponse', { success: true });
+    }
+  });
 
   socket.on('sendMsgToServer', data => {
     const playerName = ("" + socket.id).slice(2,7);

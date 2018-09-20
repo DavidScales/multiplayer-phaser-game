@@ -10,21 +10,68 @@
 </head>
 <body>
   <!-- <h1>Title</h1> -->
-  <canvas id="ctx" width="500" height="500" style="border:1px solid #000;"></canvas>
 
-  <div id="chat-text" style="width: 500px; height: 100px; overflow-y: scroll">
-    <div>Hello!</div>
+  <div id="auth-div">
+    <label>
+      Username: <input id="auth-username" type="text">
+    </label>
+    <label>
+      Password: <input id="auth-password" type="password">
+      <button id="auth-sign-in">Sign In</button>
+      <button id="auth-sign-up">Sign Up</button>
+    </label>
   </div>
-  <form id="chat-form" action="">
-    <input id="chat-input" type="text" style="width: 500px;">
-  </form>
+
+  <div id="game-div" style="display: none;">
+    <canvas id="ctx" width="500" height="500" style="border:1px solid #000;"></canvas>
+
+    <div id="chat-text" style="width: 500px; height: 100px; overflow-y: scroll">
+      <div>Hello!</div>
+    </div>
+    <form id="chat-form" action="">
+      <input id="chat-input" type="text" style="width: 500px;">
+    </form>
+  </div>
 
   <script src="/socket.io/socket.io.js"></script>
   <script>
+    const socket = io();
+
+    const gameDiv = document.getElementById('game-div');
+    const authDiv = document.getElementById('auth-div');
+    const authUsername = document.getElementById('auth-username');
+    const authPassword = document.getElementById('auth-password');
+    const authSignIn = document.getElementById('auth-sign-in');
+    const authSignUp = document.getElementById('auth-sign-up');
+
+    authSignIn.onclick = () => {
+      socket.emit('signIn', {
+        username: authUsername.value, password: authPassword.value
+      });
+    };
+    socket.on('signInResponse', data => {
+      if (data.success) {
+        authDiv.style.display = 'none';
+        gameDiv.style.display = 'inline-block';
+      } else {
+        alert('Sign in unsuccessful');
+      }
+    });
+    authSignUp.onclick = () => {
+      socket.emit('signUp', {
+        username: authUsername.value, password: authPassword.value
+      });
+    };
+    socket.on('signUpResponse', data => {
+      if (data.success) {
+        alert('Sign up successful');
+      } else {
+        alert('Sign up unsuccessful');
+      }
+    });
+
     const ctx = document.getElementById("ctx").getContext("2d");
     ctx.font = '30px Arial';
-
-    const socket = io();
 
     socket.on('newPositions', data => {
       ctx.clearRect(0, 0, 500, 500);
