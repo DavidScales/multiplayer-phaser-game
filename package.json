@@ -18,6 +18,7 @@
   "homepage": "https://github.com/DavidScales/multiplayer-phaser-game#readme",
   "dependencies": {
     "express": "^4.16.3",
+    "mongodb": "^3.1.6",
     "socket.io": "^2.1.1"
   }
 }

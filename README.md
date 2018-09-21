@@ -487,6 +487,164 @@ TODO: come back to the above post-DB
 
 ### user persistence with databases
 
+mongoDB
+
+database
+  collection0
+    document0
+    document1
+    document2
+  collection1
+    document0
+    document1
+    document2
+
+myGame
+  account
+    {username: "bob", password: "pass"}
+    {username: "alice", password: "admin"}
+  progress
+    {username: "bob", level: 3}
+    {username: "alice", level: 4}
+
+collection like a SQL table
+document like a SQL record
+
+install the DB with brew? and then the driver with npm?
+brew install mongodb
+https://docs.mongodb.com/manual/tutorial/install-mongodb-on-os-x/
+mongodb 3.6.4 is already installed
+
+creates a default data directory at /data/db
+
+installing yourself - could have issues with file permissions, and process will depend on your system. probably just gonna have to see appropriate documentation
+https://docs.mongodb.com/v3.6/installation/
+
+also note that I am using 3.6 and not 4.0. Had a brief bad expericne with 4 and the docs/api being kinda poor so im going to stick with 3.6 for now.
+
+start the database application with `mongod` (no `b`)
+https://docs.mongodb.com/manual/reference/program/mongod/#bin.mongod
+> mongod is the primary daemon process for the MongoDB system. It handles data requests, manages data access, and performs background management operations.
+
+and listens on a port like a web server
+where daemon is a fancy way of saying background process
+
+connect with it via command line with `mongo`
+https://docs.mongodb.com/manual/reference/program/mongo/#bin.mongo
+> mongo is an interactive JavaScript shell interface to MongoDB, which provides a powerful interface for system administrators as well as a way for developers to test queries and operations directly with the database. mongo also provides a fully functional JavaScript environment for use with a MongoDB.
+
+from the mongo shell
+`db` shows current db, which is just `test`
+`show dbs` shows all databases
+`use <database name>` swtichs to a db (or creates it)
+
+Session:
+```
+> db
+test
+> show dbs
+admin   0.000GB
+config  0.000GB
+local   0.000GB
+> use myGame
+switched to db myGame
+```
+
+Then create collections with `db.createCollection()` and add documents to them with `db.<collection>.insert()`.
+
+Session:
+```
+> db.createCollection("account")
+{ "ok" : 1 }
+> db.createCollection("progress")
+{ "ok" : 1 }
+> db.account.insert({ username: "david", password: "isGreat" })
+WriteResult({ "nInserted" : 1 })
+> db.account.insert({ username: "nick", password: "isAwesome" })
+WriteResult({ "nInserted" : 1 })
+> db.progress.insert({ username: "david", level: 3, questComplete: ['myQuest1', 'myQuest2'] });
+WriteResult({ "nInserted" : 1 })
+```
+
+can query with `db.<collection>.find(<must match>, <to retrieve>)` where
+
+```
+> db.account.find({ username: "david"});
+{ "_id" : ObjectId("5ba428d3a91f74c7caf59997"), "username" : "david", "password" : "isGreat" }
+> db.account.find({ username: "david"}).pretty();
+{
+	"_id" : ObjectId("5ba428d3a91f74c7caf59997"),
+	"username" : "david",
+	"password" : "isGreat"
+}
+> db.progress.find({ username: "david"});
+{ "_id" : ObjectId("5ba42c01a91f74c7caf5999a"), "username" : "david", "level" : 3, "questComplete" : [ "myQuest1", "myQuest2" ] }
+> db.progress.find({ username: "david"}, { level: 1 });
+{ "_id" : ObjectId("5ba4297aa91f74c7caf59999"), "level" : 3 }
+```
+
+can update with `db.<collection>.update(<must match>, { $set: <new values> })`
+
+```
+> db.progress.update({ username: "david" }, { $set: { level: 4 } });
+WriteResult({ "nMatched" : 1, "nUpserted" : 0, "nModified" : 1 })
+> db.progress.find({ username: "david"}, { level: 1 });
+{ "_id" : ObjectId("5ba42c01a91f74c7caf5999a"), "level" : 4 }
+```
+
+this is all cool but obviously we want to send database requests from the server and not from the command line. So we need to install a MongoDB driver for Node.js:
+http://mongodb.github.io/node-mongodb-native/3.1/quick-start/quick-start/
+
+npm install mongodb --save
+
+(tutorial recommends `mongojs` but its not the official driver?)
+(is the official one promise based?)
+
+assuming the database application was started with `mongod`, I can set up a connection to the database in the express server with
+
+```
+const MongoClient = require('mongodb').MongoClient;
+const assert = require('assert');
+
+const url = 'mongodb://localhost:27017';
+const dbName = 'myGame';
+MongoClient.connect(url, { useNewUrlParser: true }, function(err, client) {
+  assert.equal(null, err);
+  console.log("Connected successfully to server");
+  const db = client.db(dbName);
+  client.close();
+});
+```
+
+Here I import the database client (`MongoClient`) from the mongodb package, as well as the `assert` package which i believe is part of the standard library for Node.js.
+
+The `url` represent the address of the database application, just like how my server listens on localhost:XXXX.
+
+The `connect` method lets me connect to the database
+the useNewUrlParser is just probably a temporary arg while some old url parser is deprecated.
+
+the typical node style is for methods to accept callback which take `err, ...args`, and generally check for err at the beginning of the callback function. MORE HERE.
+
+Lookls the connect function works the same way here. the assert library is used to ensure that there were no errors, and then db is used to instantiate the game db as a variable, then client is just closed since im just setting up and dont need to do anything here.
+
+gonna try with promises cuz im legit and callbacks kinda suck:
+
+MongoClient.connect(url, { useNewUrlParser: true })
+  .then(client => {
+    console.log("Connected successfully to server");
+    const db = client.db(dbName);
+    client.close();
+  }).catch(err => {
+    console.log(err);
+  });
+
+works! just figured this out by guessing and logging, since the documentation doesn't seem to cover it...
+
+now trying with async await:
+ehhhh actually can'y use await at the top level (needs to be in an async function, so probably just skip for now. maybe come back to this.)
+https://javascript.info/async-await
+
+
 
 
 NOTE: possibly add notes about the socket vs client session issues I had with Nick

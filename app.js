@@ -11,6 +11,18 @@ app.use('/client', express.static(`${__dirname}/client`));
 console.log(`Server listening on localhost:${port}`);
 server.listen(port);
 
+const MongoClient = require('mongodb').MongoClient;
+const url = 'mongodb://localhost:27017';
+const dbName = 'myGame';
+MongoClient.connect(url, { useNewUrlParser: true })
+  .then(client => {
+    console.log("Connected successfully to server");
+    const db = client.db(dbName);
+    client.close();
+  }).catch(err => {
+    console.log(err);
+  });
+
 const SOCKET_LIST = {};
 
 const Entity = () => {
