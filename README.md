@@ -629,11 +629,15 @@ Lookls the connect function works the same way here. the assert library is used 
 
 gonna try with promises cuz im legit and callbacks kinda suck:
 
-MongoClient.connect(url, { useNewUrlParser: true })
+const MongoClient = require('mongodb').MongoClient;
+const assert = require('assert');
+
+const url = 'mongodb://localhost:27017';
+const dbName = 'myGame';
+const dbPromise = MongoClient.connect(url, { useNewUrlParser: true })
   .then(client => {
     console.log("Connected successfully to server");
-    const db = client.db(dbName);
-    client.close();
+    return client.db(dbName);
   }).catch(err => {
     console.log(err);
   });
@@ -641,8 +645,72 @@ MongoClient.connect(url, { useNewUrlParser: true })
 works! just figured this out by guessing and logging, since the documentation doesn't seem to cover it...
 
 now trying with async await:
-ehhhh actually can'y use await at the top level (needs to be in an async function, so probably just skip for now. maybe come back to this.)
+!can't use await at the top level (needs to be in an async function)
 https://javascript.info/async-await
+
+  const MongoClient = require('mongodb').MongoClient;
+  const assert = require('assert');
+
+  const url = 'mongodb://localhost:27017';
+  const dbName = 'myGame';
+  const initDb = async (url, dbName) => {
+    try {
+      const client = await MongoClient.connect(url, { useNewUrlParser: true });
+      console.log('Connected successfully to database');
+      return client.db(dbName);
+    } catch (err) {
+      console.log(err);
+    }
+  };
+  const dbPromise = initDb(url, dbName);
+
+
+#### updating auth
+
+Now im going to update the auth functions from using a global variable:
+
+  const USERS = {
+    // username: password
+    'admin': 'password',
+    'david': 'isCool',
+  };
+  const isValidUser = async data => {
+    return USERS[data.username] === data.password;
+  };
+  const isUsernameTaken = async data => {
+    return USERS[data.username];
+  };
+  const addUser = async data => {
+    USERS[data.username] = data.password;
+  };
+
+to using the database:
+
+    // TODO: sanitization and potential security issues
+    // TODO: passwords should be salted hashes
+    const isValidUser = async data => {
+      const db = await dbPromise;
+      const users = await db.collection('account')
+        .find(data)
+        .toArray();
+      return users.length === 1;
+    };
+    const isUsernameTaken = async data => {
+      const db = await dbPromise;
+      const users = await db.collection('account')
+        .find({username: data.username })
+        .toArray();
+      return users.length === 1;
+    };
+    const addUser = async data => {
+      const db = await dbPromise;
+      const users = await db.collection('account')
+        .insertOne(data)
+      assert.equal(1, users.insertedCount);
+    };
+
+
+###
 
 
 

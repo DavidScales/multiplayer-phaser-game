@@ -12,16 +12,27 @@ console.log(`Server listening on localhost:${port}`);
 server.listen(port);
 
 const MongoClient = require('mongodb').MongoClient;
+const assert = require('assert');
 const url = 'mongodb://localhost:27017';
 const dbName = 'myGame';
-MongoClient.connect(url, { useNewUrlParser: true })
-  .then(client => {
-    console.log("Connected successfully to server");
-    const db = client.db(dbName);
-    client.close();
-  }).catch(err => {
+const initDb = async (url, dbName) => {
+  try {
+    const client = await MongoClient.connect(url, { useNewUrlParser: true });
+    console.log('Connected successfully to database');
+    return client.db(dbName);
+  } catch (err) {
     console.log(err);
-  });
+  }
+};
+const dbPromise = initDb(url, dbName);
+
+// const dbPromise = MongoClient.connect(url, { useNewUrlParser: true })
+//   .then(client => {
+//     console.log("Connected successfully to server");
+//     return client.db(dbName);
+//   }).catch(err => {
+//     console.log(err);
+//   });
 
 const SOCKET_LIST = {};
 
@@ -191,19 +202,26 @@ Bullet.update = () => {
 const DEBUG = true;
 
 // TODO: sanitization and potential security issues
-const USERS = {
-  // username: password
-  'admin': 'password',
-  'david': 'isCool',
-};
+// TODO: passwords should be salted hashes
 const isValidUser = async data => {
-  return USERS[data.username] === data.password;
+  const db = await dbPromise;
+  const users = await db.collection('account')
+    .find(data)
+    .toArray();
+  return users.length === 1;
 };
 const isUsernameTaken = async data => {
-  return USERS[data.username];
+  const db = await dbPromise;
+  const users = await db.collection('account')
+    .find({username: data.username })
+    .toArray();
+  return users.length === 1;
 };
 const addUser = async data => {
-  USERS[data.username] = data.password;
+  const db = await dbPromise;
+  const users = await db.collection('account')
+    .insertOne(data)
+  assert.equal(1, users.insertedCount);
 };
 
 const io = require('socket.io')(server, {});
