@@ -788,6 +788,55 @@ for other players and objects, this means that their positions are drawn relativ
 * turn DEBUG off. also wrap in try/catch so that server doesn't shut down on bad eval
 * soooo much potential...
 * see phone notes
+* for glitch hosting, will probably need more info in package.json like the engine, and start command. example glitch package.json:
+
+    {
+      "//1": "describes your app and its dependencies",
+      "//2": "https://docs.npmjs.com/files/package.json",
+      "//3": "updating this file will download and update your packages",
+      "name": "hello-sqlite",
+      "version": "0.0.1",
+      "description": "A simple Node app with SQLite as a database management system, instantly up and running.",
+      "main": "server.js",
+      "scripts": {
+        "start": "node server.js"
+      },
+      "dependencies": {
+        "express": "^4.16.3",
+        "sqlite3": "^4.0.0"
+      },
+      "engines": {
+        "node": "8.x"
+      },
+      "repository": {
+        "url": "https://glitch.com/edit/#!/hello-sqlite"
+      },
+      "license": "MIT",
+      "keywords": [
+        "node",
+        "glitch",
+        "express"
+      ]
+    }
+
+Youll also want to use a .env file for secret stuff. example:
+
+    # Environment Config
+
+    # store your secrets and config variables in here
+    # only invited collaborators will be able to see your .env values
+
+    # reference these in your code with process.env.SECRET
+
+    SECRET=
+    MADE_WITH=
+
+    # note: .env is a shell file so there can't be spaces around =
+
+and the server port will probably be `process.env.PORT || 8081`
+
+--
+
 
 NOTE: possibly add notes about the socket vs client session issues I had with Nick
 
