@@ -81,6 +81,15 @@
       self.x = initPack.x;
       self.y = initPack.y;
       self.number = initPack.number;
+      self.hp = initPack.hp;
+      self.hpMax = initPack.hpMax;
+      self.score = initPack.score;
+      self.draw = () => {
+        const hpWidth = 30 * self.hp / self.hpMax;
+        ctx.fillRect(self.x - hpWidth / 2, self.y - 40, hpWidth, 4);
+        ctx.fillText(self.number, self.x, self.y);
+        ctx.fillText(self.score, self.x, self.y - 60);
+      };
       Player.list[self.id] = self;
       return self;
     };
@@ -91,6 +100,9 @@
       self.id = initPack.id;
       self.x = initPack.x;
       self.y = initPack.y;
+      self.draw = () => {
+        ctx.fillRect(self.x - 5, self.y - 5, 10, 10);
+      };
       Bullet.list[self.id] = self;
       return self;
     };
@@ -119,6 +131,12 @@
           }
           if (playerPack.y !== undefined) {
             player.y = playerPack.y;
+          }
+          if (playerPack.hp !== undefined) {
+            player.hp = playerPack.hp;
+          }
+          if (playerPack.score !== undefined) {
+            player.score = playerPack.score;
           }
         }
       }
@@ -155,11 +173,11 @@
       ctx.clearRect(0, 0, 500, 500);
       for (let i in Player.list) {
         let player = Player.list[i];
-        ctx.fillText(player.number, player.x, player.y);
+        player.draw();
       }
       for (let i in Bullet.list) {
         let bullet = Bullet.list[i];
-        ctx.fillRect(bullet.x - 5, bullet.y - 5, 10, 10);
+        bullet.draw();
       }
     }, 40);
 

@@ -745,13 +745,15 @@ so this does mean less data in theory. one concern I have though is that this co
 
 
 
+
 ## Todos
 
 * sessions to stay logged in. log out button
 * refactor like crazy, organized into modules, remove magic numbers
 * fix the mouse pointer issue - shooting is relative to the center of the canvas
 * clean up UI / UX
-* use WASD keys, without breaking chat
+* use WASD and other keys without breaking chat
+* chat history not shown when new players join
 * turn DEBUG off. also wrap in try/catch so that server doesn't shut down on bad eval
 * soooo much potential...
 * see phone notes

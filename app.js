@@ -72,6 +72,9 @@ const Player = id => {
   self.pressingAttack = false;
   self.mouseAngle = 0;
   self.maxSpeed = 10;
+  self.hp = 10;
+  self.hpMax = 10;
+  self.score = 0;
 
   const superUpdate = self.update;
   self.update = () => {
@@ -116,6 +119,8 @@ const Player = id => {
       id: self.id,
       x: self.x,
       y: self.y,
+      hp: self.hp,
+      score: self.score,
     };
   };
 
@@ -125,6 +130,9 @@ const Player = id => {
       x: self.x,
       y: self.y,
       number: self.number,
+      hp: self.hp,
+      hpMax: self.hpMax,
+      score: self.score,
     };
   };
   Player.list[id] = self;
@@ -201,6 +209,17 @@ const Bullet = (parent, angle) => {
       let player = Player.list[i];
       if (self.getDistance(player) < 32 && self.parent !== player.id) {
         // TODO handle collision damage
+        player.hp--;
+        if (player.hp <= 0) {
+          player.hp = player.hpMax;
+          player.x = Math.random() * 500;
+          player.y = Math.random() * 500;
+
+          const shooter = Player.list[self.parent];
+          if (shooter) {
+            shooter.score++;
+          }
+        }
         self.toRemove = true;
       }
     }
