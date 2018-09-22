@@ -758,6 +758,25 @@ ctx.drawImage(img, x, y, ...);
 1. load into memory once
 2. display the image many times
 
+
+#### drawing everything relative to the player
+
+before everything was in absolute terms of x and y relative to the upper left corner of the canvas, which is the default way that canvas works (andy coordinates are measure from the upper left corner).
+
+first we add WIDTH/2 to all x and HEIGHT/2 to all y coordinates, where WIDTH and HEIGHT represent the width and height of the canvas element itself, respectively
+
+this basically just shifts the origin to the the center of the canvas. so now any x and y coordinates are relative to the center, instead of the upper left corner.
+
+then we subtract the client's "self" player from all coordinates. in other words we keep track in the client of which player actually represents that clients player, and for every other player or bullet or obstacle we subtract the self-player's coordinates. it looks something like this:
+
+const relativeX = self.x - Player.list[selfId].x + WIDTH/2;
+const relativeY = self.y - Player.list[selfId].y + HEIGHT/2;
+
+so for the self-player, they are effectively always painted in the center, since we are subtracting thier position from thier own position (zero) and then adding WIDTH/2 and HEIGHT/2.
+
+for other players and objects, this means that their positions are drawn relative to the player. so if the player moves to the right, the player is still drawn in the center, but the other players are now drawn more to the left.
+
+
 ## Todos
 
 * sessions to stay logged in. log out button
