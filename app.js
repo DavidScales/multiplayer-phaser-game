@@ -36,13 +36,28 @@ const dbPromise = initDb(url, dbName);
 
 const SOCKET_LIST = {};
 
-const Entity = () => {
+const Entity = (override) => {
   const self = {
     x: 250,
     y: 250,
     speedX: 0,
     speedY: 0,
-    id:"",
+    map: 'forest',
+    id:'',
+  }
+  if (override) {
+    if (override.x) {
+      self.x = override.x;
+    }
+    if (override.y) {
+      self.y = override.y;
+    }
+    if (override.map) {
+      self.map = override.map;
+    }
+    if (override.id) {
+      self.id = override.id;
+    }
   }
 
   self.update = () => {
@@ -61,9 +76,8 @@ const Entity = () => {
   return self;
 };
 
-const Player = id => {
-  const self = Entity();
-  self.id = id;
+const Player = config => {
+  const self = Entity(config);
   self.number = "" + Math.floor(10 * Math.random());
   self.pressingRight = false;
   self.pressingLeft = false;
@@ -87,9 +101,12 @@ const Player = id => {
   };
 
   self.shootBullet = (angle) => {
-    const bullet = Bullet(self.id, angle);
-    bullet.x = self.x;
-    bullet.y = self.y;
+    Bullet({
+      parent: self.id,
+      angle: angle,
+      x: self.x,
+      y: self.y,
+    });
   };
 
   self.updateSpeed = () => {
@@ -141,7 +158,10 @@ const Player = id => {
 };
 Player.list = {};
 Player.onConnect = socket => {
-  const player = Player(socket.id);
+  const player = Player({
+    id: socket.id,
+    //x, y, etc. from db
+  });
 
   socket.on('keyPress', data => {
     if (data.inputId === 'left') {
@@ -191,13 +211,14 @@ Player.update = () => {
   return pack;
 };
 
-const Bullet = (parent, angle) => {
-  const self = Entity();
+const Bullet = (config) => {
+  const self = Entity(config);
   self.id = Math.random();
-  self.speedX = Math.cos(angle / 180 * Math.PI) * 10;
-  self.speedY = Math.sin(angle / 180 * Math.PI) * 10;
+  self.angle = config.angle;
+  self.speedX = Math.cos(config.angle / 180 * Math.PI) * 10;
+  self.speedY = Math.sin(config.angle / 180 * Math.PI) * 10;
   self.timer = 0;
-  self.parent = parent;
+  self.parent = config.parent;
   self.toRemove = false;
   const superUpdate = self.update;
   self.update = () => {
