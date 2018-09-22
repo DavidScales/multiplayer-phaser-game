@@ -129,7 +129,11 @@
 
     // init
 
+    let selfId = null;
     socket.on('init', data => {
+      if (data.selfId) {
+        selfId = data.selfId;
+      }
       for (let i = 0; i < data.players.length; i++) {
         Player(data.players[i]);
       }
@@ -189,8 +193,12 @@
 
     // TODO: requestAnimationFrame()
     setInterval(() => {
+      if (!selfId) {
+        return;
+      }
       ctx.clearRect(0, 0, 500, 500);
       drawMap();
+      drawScore();
       for (let i in Player.list) {
         let player = Player.list[i];
         player.draw();
@@ -203,6 +211,11 @@
 
     const drawMap = () => {
       ctx.drawImage(images.map, 0, 0);
+    };
+
+    const drawScore = () => {
+      ctx.fillStyle = 'white';
+      ctx.fillText(Player.list[selfId].score, 10, 30);
     };
 
     document.onkeydown = event => {

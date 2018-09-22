@@ -165,6 +165,7 @@ Player.onConnect = socket => {
   });
 
   socket.emit('init', {
+    selfId: socket.id,
     players: Player.getAllInitPack(),
     bullets: Bullet.getAllInitPack(),
   });
