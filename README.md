@@ -744,7 +744,19 @@ client simply loops now, repainting wahtever game state it currently has at a se
 so this does mean less data in theory. one concern I have though is that this could make cheating easier, since someone can modify the game state on the client. but right now it doesnt seem like a probablem, because the server only expects key input events and theres no game state data flowing from the client to the server, so modifying the local game state shouldn't really matter.
 
 
+#### images
 
+just canvas API basically. for example:
+
+loads:
+const img = new Image();
+img.src = "img/player.png"
+
+displays:
+ctx.drawImage(img, x, y, ...);
+
+1. load into memory once
+2. display the image many times
 
 ## Todos
 
@@ -753,7 +765,7 @@ so this does mean less data in theory. one concern I have though is that this co
 * fix the mouse pointer issue - shooting is relative to the center of the canvas
 * clean up UI / UX
 * use WASD and other keys without breaking chat
-* chat history not shown when new players join
+* chat history not shown when new players join. save chats in general. save player stuff in general
 * turn DEBUG off. also wrap in try/catch so that server doesn't shut down on bad eval
 * soooo much potential...
 * see phone notes
