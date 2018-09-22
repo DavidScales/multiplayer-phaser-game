@@ -710,10 +710,51 @@ to using the database:
     };
 
 
-###
+### game state
+
+sending full game state back and forth in web sockets on every frame is expensive. going to split it into three parts
+
+1. init - for when new stuff is created, contains all data. big but only sent once
+2. update - just differences to update, tiny and every frame
+3. remove - just id's of things to remove
+
+So before:
+
+server listens for client input events from keys (like player movement, or bullets firing)
+every 25fps, server updates the game state (for example calculating new bullet positions), and emits the entire state to the client
+
+client listens for entire game state from server
+when client gets state, repaints everything
+
+issue tutorial says:
+* sending more data then necessary - sending 100% of game state each server frame
+
+Is this also an issue? or not really?:
+* rendering is dependent on the server. Since rendering happens when server events are received by client, I am only rendering at 25fps
+
+So now:
+
+client listens for init, update, and remove events
+* init is used to send the entire game state data for the first time or one-off times (like new players joining). This state data is then saved on the client. so the client has the game state now.
+* update events are sent by the server similarly to before, every server frame, but now only contain new data (like updated positions)
+* remove events are emitted when data should be removed from the game state on the client (the server also removes the same data from its state at the same time)
+
+client simply loops now, repainting wahtever game state it currently has at a set interval. (this should use requestAnimationFrame!) (so now the rendering is independent of the server frames, which also seems good, but i cant articulate why right now...)
+
+so this does mean less data in theory. one concern I have though is that this could make cheating easier, since someone can modify the game state on the client. but right now it doesnt seem like a probablem, because the server only expects key input events and theres no game state data flowing from the client to the server, so modifying the local game state shouldn't really matter.
 
 
 
+## Todos
+
+* sessions to stay logged in. log out button
+* refactor like crazy, organized into modules, remove magic numbers
+* fix the mouse pointer issue - shooting is relative to the center of the canvas
+* clean up UI / UX
+* use WASD keys, without breaking chat
+* turn DEBUG off. also wrap in try/catch so that server doesn't shut down on bad eval
+* soooo much potential...
+* see phone notes
 
 NOTE: possibly add notes about the socket vs client session issues I had with Nick
 

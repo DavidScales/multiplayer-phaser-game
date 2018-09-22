@@ -110,7 +110,25 @@ const Player = id => {
       self.speedY = 0;
     }
   };
+
+  self.getUpdatePack = () => {
+    return {
+      id: self.id,
+      x: self.x,
+      y: self.y,
+    };
+  };
+
+  self.getInitPack = () => {
+    return {
+      id: self.id,
+      x: self.x,
+      y: self.y,
+      number: self.number,
+    };
+  };
   Player.list[id] = self;
+  initPack.players.push(self.getInitPack());
   return self;
 };
 Player.list = {};
@@ -137,20 +155,29 @@ Player.onConnect = socket => {
       player.mouseAngle = data.state;
     }
   });
+
+  socket.emit('init', {
+    players: Player.getAllInitPack(),
+    bullets: Bullet.getAllInitPack(),
+  });
+};
+Player.getAllInitPack = () => {
+  const existingPlayers = [];
+  for (let i in Player.list) {
+    existingPlayers.push(Player.list[i].getInitPack());
+  }
+  return existingPlayers;
 };
 Player.onDisconnect = socket => {
   delete Player.list[socket.id];
+  removePack.players.push(socket.id);
 };
 Player.update = () => {
   const pack = [];
   for (let i in Player.list) {
     let player = Player.list[i];
     player.update();
-    pack.push({
-      x: player.x,
-      y: player.y,
-      number: player.number
-    });
+    pack.push(player.getUpdatePack());
   }
   return pack;
 };
@@ -178,7 +205,25 @@ const Bullet = (parent, angle) => {
       }
     }
   };
+
+  self.getInitPack = () => {
+    return {
+      id: self.id,
+      x: self.x,
+      y: self.y,
+    };
+  };
+
+  self.getUpdatePack = () => {
+    return {
+      id: self.id,
+      x: self.x,
+      y: self.y,
+    };
+  };
+
   Bullet.list[self.id] = self;
+  initPack.bullets.push(self.getInitPack());
   return self;
 };
 Bullet.list = {};
@@ -189,14 +234,19 @@ Bullet.update = () => {
     bullet.update();
     if (bullet.toRemove) {
       delete Bullet.list[i];
+      removePack.bullets.push(bullet.id);
     } else {
-      pack.push({
-        x: bullet.x,
-        y: bullet.y,
-      });
+      pack.push(bullet.getUpdatePack());
     }
   }
   return pack;
+};
+Bullet.getAllInitPack = () => {
+  const existingBullets = [];
+  for (let i in Bullet.list) {
+    existingBullets.push(Bullet.list[i].getInitPack());
+  }
+  return existingBullets;
 };
 
 const DEBUG = true;
@@ -273,6 +323,9 @@ io.sockets.on('connection', socket => {
   });
 });
 
+const initPack = { players: {}, bullets: {} };
+const removePack = { players: {}, bullets: {} };
+
 setInterval(() => {
   const pack = {
     players: Player.update(),
@@ -280,6 +333,13 @@ setInterval(() => {
   };
   for (let i in SOCKET_LIST) {
     let socket = SOCKET_LIST[i];
-    socket.emit('newPositions', pack);
+    // could probably optimize only sending init & remove when they occur
+    socket.emit('init', initPack);
+    socket.emit('update', pack);
+    socket.emit('remove', removePack);
   }
-}, 1000/25); // 25 FPS
+  initPack.players = [];
+  initPack.bullets = [];
+  removePack.players = [];
+  removePack.bullets = [];
+}, 1000 / 25); // 25 FPS

@@ -70,20 +70,98 @@
       }
     });
 
+    // game
+
     const ctx = document.getElementById("ctx").getContext("2d");
     ctx.font = '30px Arial';
 
-    socket.on('newPositions', data => {
-      ctx.clearRect(0, 0, 500, 500);
+    const Player = initPack => {
+      const self = {};
+      self.id = initPack.id;
+      self.x = initPack.x;
+      self.y = initPack.y;
+      self.number = initPack.number;
+      Player.list[self.id] = self;
+      return self;
+    };
+    Player.list = {};
+
+    const Bullet = initPack => {
+      const self = {};
+      self.id = initPack.id;
+      self.x = initPack.x;
+      self.y = initPack.y;
+      Bullet.list[self.id] = self;
+      return self;
+    };
+    Bullet.list = {};
+
+    // init
+
+    socket.on('init', data => {
       for (let i = 0; i < data.players.length; i++) {
-        let player = data.players[i];
-        ctx.fillText(player.number, player.x, player.y);
+        Player(data.players[i]);
       }
       for (let i = 0; i < data.bullets.length; i++) {
-        let bullet = data.bullets[i];
-        ctx.fillRect(bullet.x - 5, bullet.y - 5, 10, 10);
+        Bullet(data.bullets[i]);
       }
     });
+
+    // update
+
+    socket.on('update', data => {
+      for (let i = 0; i < data.players.length; i++) {
+        let playerPack = data.players[i];
+        let player = Player.list[playerPack.id];
+        if (player) {
+          if (playerPack.x !== undefined) {
+            player.x = playerPack.x;
+          }
+          if (playerPack.y !== undefined) {
+            player.y = playerPack.y;
+          }
+        }
+      }
+      for (let i = 0; i < data.bullets.length; i++) {
+        let bulletPack = data.bullets[i];
+        let bullet = Bullet.list[bulletPack.id];
+        if (bullet) {
+          if (bulletPack.x !== undefined) {
+            bullet.x = bulletPack.x;
+          }
+          if (bulletPack.y !== undefined) {
+            bullet.y = bulletPack.y;
+          }
+        }
+      }
+
+    });
+
+    // remove
+
+    socket.on('remove', data => {
+      for (let i = 0; i < data.players.length; i++) {
+        delete Player.list[data.players[i]];
+      }
+      for (let i = 0; i < data.bullets.length; i++) {
+        delete Bullet.list[data.bullets[i]];
+      }
+    });
+
+    // loop
+
+    // TODO: requestAnimationFrame()
+    setInterval(() => {
+      ctx.clearRect(0, 0, 500, 500);
+      for (let i in Player.list) {
+        let player = Player.list[i];
+        ctx.fillText(player.number, player.x, player.y);
+      }
+      for (let i in Bullet.list) {
+        let bullet = Bullet.list[i];
+        ctx.fillRect(bullet.x - 5, bullet.y - 5, 10, 10);
+      }
+    }, 40);
 
     document.onkeydown = event => {
       if (event.keyCode === 68) { // d key
@@ -132,7 +210,7 @@
     const chatInput = document.getElementById('chat-input');
     const chatForm = document.getElementById('chat-form');
     socket.on('addToChat', data => {
-      // THIS BETTER BE SANITIZED :O
+      // TODO: THIS BETTER BE SANITIZED :O
       chatText.innerHTML += '<div>' + data + '</div>';
     });
     socket.on('evalAnswer', data => {
