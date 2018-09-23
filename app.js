@@ -106,6 +106,7 @@ const Player = config => {
       angle: angle,
       x: self.x,
       y: self.y,
+      map: self.map,
     });
   };
 
@@ -150,16 +151,22 @@ const Player = config => {
       hp: self.hp,
       hpMax: self.hpMax,
       score: self.score,
+      map: self.map,
     };
   };
-  Player.list[id] = self;
+  Player.list[self.id] = self;
   initPack.players.push(self.getInitPack());
   return self;
 };
 Player.list = {};
 Player.onConnect = socket => {
+  let map = 'forest'; // this is also hard coded in Entity. abstract.
+  if (Math.random() < 0.5) {
+    map = 'field';
+  }
   const player = Player({
     id: socket.id,
+    map: map,
     //x, y, etc. from db
   });
 
@@ -229,8 +236,7 @@ const Bullet = (config) => {
 
     for (let i in Player.list) {
       let player = Player.list[i];
-      if (self.getDistance(player) < 32 && self.parent !== player.id) {
-        // TODO handle collision damage
+      if (self.map === player.map && self.getDistance(player) < 32 && self.parent !== player.id) {
         player.hp--;
         if (player.hp <= 0) {
           player.hp = player.hpMax;
@@ -252,6 +258,7 @@ const Bullet = (config) => {
       id: self.id,
       x: self.x,
       y: self.y,
+      map: self.map,
     };
   };
 

@@ -777,6 +777,29 @@ so for the self-player, they are effectively always painted in the center, since
 for other players and objects, this means that their positions are drawn relative to the player. so if the player moves to the right, the player is still drawn in the center, but the other players are now drawn more to the left.
 
 
+#### map system?
+
+game objects have a map property
+so player.map = 'forest' or something
+
+random map assigned on player connection
+bullets inherit the map of the player that creates them
+
+basically the draw and logic functions just check the map
+so on the client:
+drawMap checks which map to draw for the self-player
+drawPlayer and drawBullet similarly only draw if the player/bullet is in the same map
+
+on the server:
+collision detection only checks for collision when objects are on the same map
+
+smells a little hacky, but it works well enough for now. seems like the beginning of players being in different "games" or "matches".
+
+
+QUESTION: how do people handle lots of games? there must be some limit to socket connecttions, so other server instances must have to be spun up. how is that set up and managed?
+
+
+
 ## Todos
 
 * sessions to stay logged in. log out button

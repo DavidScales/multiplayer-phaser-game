@@ -80,8 +80,11 @@
     images.player.src = '/client/img/player.png';
     images.bullet = new Image();
     images.bullet.src = '/client/img/bullet.png';
-    images.map = new Image();
-    images.map.src = '/client/img/map.png';
+    images.maps = {};
+    images.maps['field'] = new Image();
+    images.maps['field'].src = '/client/img/field.png';
+    images.maps['forest'] = new Image();
+    images.maps['forest'].src = '/client/img/forest.png';
 
     const ctx = document.getElementById("ctx").getContext("2d");
     ctx.font = '30px Arial';
@@ -95,20 +98,23 @@
       self.hp = initPack.hp;
       self.hpMax = initPack.hpMax;
       self.score = initPack.score;
+      self.map = initPack.map;
       self.draw = () => {
-        const relativeX = self.x - Player.list[selfId].x + WIDTH/2;
-        const relativeY = self.y - Player.list[selfId].y + HEIGHT/2;
-        const hpWidth = 30 * self.hp / self.hpMax;
-        ctx.fillStyle = 'red';
-        ctx.fillRect(relativeX - hpWidth / 2, relativeY - 40, hpWidth, 4);
-        // ctx.fillText(self.number, relativeX, relativeY);
-        // ctx.fillText(self.score, self.x, self.y - 60);
-        const displayWidth = images.player.width * 2;
-        const displayHeight = images.player.height * 2;
-        ctx.drawImage(images.player, 0, 0,
-            images.player.width, images.player.height,
-            relativeX - displayWidth / 2, relativeY - displayHeight / 2,
-            displayWidth, displayHeight);
+        if (Player.list[selfId].map === initPack.map) {
+          const relativeX = self.x - Player.list[selfId].x + WIDTH/2;
+          const relativeY = self.y - Player.list[selfId].y + HEIGHT/2;
+          const hpWidth = 30 * self.hp / self.hpMax;
+          ctx.fillStyle = 'red';
+          ctx.fillRect(relativeX - hpWidth / 2, relativeY - 40, hpWidth, 4);
+          // ctx.fillText(self.number, relativeX, relativeY);
+          // ctx.fillText(self.score, self.x, self.y - 60);
+          const displayWidth = images.player.width * 2;
+          const displayHeight = images.player.height * 2;
+          ctx.drawImage(images.player, 0, 0,
+              images.player.width, images.player.height,
+              relativeX - displayWidth / 2, relativeY - displayHeight / 2,
+              displayWidth, displayHeight);
+        }
       };
       Player.list[self.id] = self;
       return self;
@@ -121,13 +127,15 @@
       self.x = initPack.x;
       self.y = initPack.y;
       self.draw = () => {
-        const displayWidth = images.bullet.width / 2;
-        const displayHeight = images.bullet.height / 2;
-        const relativeX = self.x - Player.list[selfId].x + WIDTH/2;
-        const relativeY = self.y - Player.list[selfId].y + HEIGHT/2;
-        ctx.drawImage(images.bullet, 0, 0, images.bullet.width,
-            images.bullet.height, relativeX - displayWidth, relativeY - displayHeight,
-            displayWidth, displayHeight);
+        if (Player.list[selfId].map === initPack.map) {
+          const displayWidth = images.bullet.width / 2;
+          const displayHeight = images.bullet.height / 2;
+          const relativeX = self.x - Player.list[selfId].x + WIDTH/2;
+          const relativeY = self.y - Player.list[selfId].y + HEIGHT/2;
+          ctx.drawImage(images.bullet, 0, 0, images.bullet.width,
+              images.bullet.height, relativeX - displayWidth, relativeY - displayHeight,
+              displayWidth, displayHeight);
+        }
       };
       Bullet.list[self.id] = self;
       return self;
@@ -217,9 +225,10 @@
     }, 40);
 
     const drawMap = () => {
-      const relativeX = WIDTH/2 - Player.list[selfId].x;
-      const relativeY = WIDTH/2 - Player.list[selfId].y;
-      ctx.drawImage(images.map, relativeX, relativeY);
+      const player = Player.list[selfId];
+      const relativeX = WIDTH/2 - player.x;
+      const relativeY = WIDTH/2 - player.y;
+      ctx.drawImage(images.maps[player.map], relativeX, relativeY);
     };
 
     const drawScore = () => {
