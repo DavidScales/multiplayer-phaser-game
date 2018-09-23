@@ -139,6 +139,7 @@ const Player = config => {
       y: self.y,
       hp: self.hp,
       score: self.score,
+      map: self.map,
     };
   };
 
@@ -188,6 +189,14 @@ Player.onConnect = socket => {
     }
     else if (data.inputId === 'mouseAngle') {
       player.mouseAngle = data.state;
+    }
+  });
+
+  socket.on('changeMap', data => {
+    if (player.map === 'field') {
+      player.map = 'forest';
+    } else {
+      player.map = 'field';
     }
   });
 

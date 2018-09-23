@@ -939,11 +939,16 @@ but this is most likely something that can still be done with other tools and is
 https://nodejs.org/en/docs/guides/simple-profiling/
 
 
+### UI
+
+note the most perf to use canvas for everything, espcially since it doesnt make sense for interactive elements like buttons. so to have interactive ui in the game, basically just going to create the ui components in html on top of the canvas, similar to how i already stacked multuple canvases on top of each other to eliminate excess redraws of more static things.
+
 
 ## Todos
 
 * sessions to stay logged in. log out button
 * consider sprite animation library
+* invesigate socket.io "rooms" & how to make multiple serves/games (https://nodejs.org/api/cluster.html)
 * refactor like crazy, organized into modules, remove magic numbers
 * fix the mouse pointer issue - shooting is relative to the center of the canvas
 * clean up UI / UX
