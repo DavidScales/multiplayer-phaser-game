@@ -801,7 +801,7 @@ QUESTION: how do people handle lots of games? there must be some limit to socket
 
 ### Performance Profiling
 
-Client:
+###### Client:
 
 in Chrome Dev Tools > Performance
 record plyaing the game
@@ -908,6 +908,36 @@ in a simple html page I ran
     </script>
 
 to run the slowHello function 10 times. in the call tree it showed that it took 2728ms (self & total). When I double the number of times slowHello was called to 20, it double the time shown in the call tree to 5626ms.
+
+###### server:
+
+npm install v8-profiler
+looks pretty darn depricated
+
+but the idea is similar to the client profiling. we create some profile data and save it to a file:
+
+    const profiler = require('v8-profiler');
+    const fs = require('fs');
+
+    const startProfiling = duration => {
+      profiler.startProfiling('1', true);
+      setTimeout(() => {
+        const profile1 = profiler.stopProfiling('1');
+        profile1.export((err, result) => {
+          fs.writeFile('./profile.cpuprofile', result);
+          profile1.delete();
+          console.log('Profile saved');
+        });
+      }, duration);
+    };
+
+    startProfiling(10000);
+
+and then open that file with Chrome Dev Tools to view similar Call Tree's and such. But looks like Chrome doesnt support that anymore or its done a different way?
+
+but this is most likely something that can still be done with other tools and is SUPER COOL and I should check it out later. TODO.
+https://nodejs.org/en/docs/guides/simple-profiling/
+
 
 
 ## Todos
