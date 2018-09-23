@@ -79,6 +79,7 @@ const Entity = (override) => {
 const Player = config => {
   const self = Entity(config);
   self.number = "" + Math.floor(10 * Math.random());
+  self.username = config.username;
   self.pressingRight = false;
   self.pressingLeft = false;
   self.pressingUp = false;
@@ -153,6 +154,7 @@ const Player = config => {
       hpMax: self.hpMax,
       score: self.score,
       map: self.map,
+      // username: self.username,
     };
   };
   Player.list[self.id] = self;
@@ -160,7 +162,7 @@ const Player = config => {
   return self;
 };
 Player.list = {};
-Player.onConnect = socket => {
+Player.onConnect = (socket, username) => {
   let map = 'forest'; // this is also hard coded in Entity. abstract.
   if (Math.random() < 0.5) {
     map = 'field';
@@ -168,6 +170,7 @@ Player.onConnect = socket => {
   const player = Player({
     id: socket.id,
     map: map,
+    username: username,
     //x, y, etc. from db
   });
 
@@ -197,6 +200,14 @@ Player.onConnect = socket => {
       player.map = 'forest';
     } else {
       player.map = 'field';
+    }
+  });
+
+  socket.on('sendMsgToServer', data => {
+    // const playerName = ("" + socket.id).slice(2,7);
+    for (let i in SOCKET_LIST) {
+      let socket = SOCKET_LIST[i];
+      socket.emit('addToChat', `${player.username}: ${data}`);
     }
   });
 
@@ -339,7 +350,7 @@ io.sockets.on('connection', socket => {
 
   socket.on('signIn', async data => {
     if (await isValidUser(data)) {
-      Player.onConnect(socket);
+      Player.onConnect(socket, data.username);
       socket.emit('signInResponse', { success: true });
     } else {
       socket.emit('signInResponse', { success: false });
@@ -352,14 +363,6 @@ io.sockets.on('connection', socket => {
     } else {
       await addUser(data);
       socket.emit('signUpResponse', { success: true });
-    }
-  });
-
-  socket.on('sendMsgToServer', data => {
-    const playerName = ("" + socket.id).slice(2,7);
-    for (let i in SOCKET_LIST) {
-      let socket = SOCKET_LIST[i];
-      socket.emit('addToChat', `${playerName}: ${data}`);
     }
   });
 

@@ -326,6 +326,11 @@
       }
     };
 
+    // prevent browser context menu on right click
+    document.oncontextmenu = event => {
+      event.preventDefault();
+    };
+
   </script>
 </body>
 </html>
