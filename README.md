@@ -799,10 +799,121 @@ smells a little hacky, but it works well enough for now. seems like the beginnin
 QUESTION: how do people handle lots of games? there must be some limit to socket connecttions, so other server instances must have to be spun up. how is that set up and managed?
 
 
+### Performance Profiling
+
+Client:
+
+in Chrome Dev Tools > Performance
+record plyaing the game
+Call Tree shows you how much time each function is taking. pretty cool!
+
+Bottom Up view shows you where functions are called from so you can see if certain functions are being called too often or in too many places.
+
+Self Time describeds how a function takes to execute without considering the time of its child calls, while Total Time describes the entire time a function took including its child function calls. for example in the below function, the Self Time of hello basically just counts the declaration(?) of the text variable, and nothing else. the total time however would include however long it takes the print function to execute.
+
+  function hello() {
+    const text = 'hello';
+    print(text);
+  }
+
+one perf inmprovement is to eliminate drawing static stuff over and over in canvas. so the game score, which doesnt change every frame doesnt need to be redrawn
+
+currently the whole canvas is wiped and then everyhing redranw. so ill make a second canvas and position them on top of each other with position:absolute. then the more static things likke the score can go in the "top" canvas. this makes a ton of sense. basically making layers and only updateing the layers that need to be updated. example
+
+    const drawScore = () => {
+      // check if it hasn't changed
+      if (lastScore === Player.list[selfId].score) {
+        return;
+      }
+
+      // if it has, update lastScore
+      lastScore = Player.list[selfId].score
+
+      // and paint in the "top" canvas
+      canvasTopLayer.clearRect(0, 0, 500, 500);
+      canvasTopLayer.fillStyle = 'white';
+      canvasTopLayer.fillText(Player.list[selfId].score, 10, 30);
+    };
+    let lastScore = null;
+
+now only calls canvas methods if the score has changed, instead of every frame.
+
+from Call Tree, before
+
+drawScore
+self - 1.9ms, 0.5%
+total - 6.7ms, 1.7%
+
+also called fillText
+self & total 4.8ms, 1.3%
+
+Now:
+
+drawScore
+self & total - 0.3ms, 0.1%
+
+and its child function calls arent even shown in the call tree, I assume because they are too small to even matter or measure.
+
+so this is a reasonable perf savings (though I suppose there could be other impacts of having multiple canvas elements and other side effects that i might not be considering).
+
+note for clarity - this example clarified to me that the time and percentage described in the call tree is the "total" time these functions are being called. when i first saw the call tree i wasnt entirely sure if for example the drawScore function took 6.7ms to execute once, or if every call of drawScore combined took 6.7 ms.
+
+This example pretty much confirms the latter, since ive actually increased the time drawScore should take by itself
+
+from
+
+    const drawScore = () => {
+      canvas.fillStyle = 'white';
+      canvas.fillText(Player.list[selfId].score, 10, 30);
+    };
+
+to
+
+    const drawScore = () => {
+      // check if it hasn't changed
+      if (lastScore === Player.list[selfId].score) {
+        return;
+      }
+
+      // if it has, update lastScore
+      lastScore = Player.list[selfId].score
+
+      // and paint in the "top" canvas
+      canvasTopLayer.clearRect(0, 0, 500, 500);
+      canvasTopLayer.fillStyle = 'white';
+      canvasTopLayer.fillText(Player.list[selfId].score, 10, 30);
+    };
+    let lastScore = null;
+
+but decreased the number of times its called. To be sure I ran another experiement:
+
+in a simple html page I ran
+
+    <script>
+      let count = 10;
+      const slowHello = () => {
+        for (let i = 0; i < 500000000; i++) {
+          let x = 2 + 2;
+        };
+      };
+      const start = Date.now();
+      document.body.insertAdjacentHTML('beforeend', `<p>start: ${start}</p>`);
+      while (count > 0) {
+        count--;
+        slowHello();
+      }
+      const end = Date.now();
+      document.body.insertAdjacentHTML('beforeend', `<p>finished: ${end}</p>`);
+      document.body.insertAdjacentHTML('beforeend', `<p>total: ${end - start}ms</p>`);
+    </script>
+
+to run the slowHello function 10 times. in the call tree it showed that it took 2728ms (self & total). When I double the number of times slowHello was called to 20, it double the time shown in the call tree to 5626ms.
+
 
 ## Todos
 
 * sessions to stay logged in. log out button
+* consider sprite animation library
 * refactor like crazy, organized into modules, remove magic numbers
 * fix the mouse pointer issue - shooting is relative to the center of the canvas
 * clean up UI / UX

@@ -23,9 +23,10 @@
   </div>
 
   <div id="game-div" style="display: none;">
-    <canvas id="ctx" width="500" height="500" style="border:1px solid #000;"></canvas>
+    <canvas id="ctx" width="500" height="500" style="position: absolute; left: 8px; top: 8px; border:1px solid #000;"></canvas>
+    <canvas id="ctx-ui" width="500" height="500" style="position: absolute; left: 8px; top: 8px; border:1px solid #000;"></canvas>
 
-    <div id="chat-text" style="width: 500px; height: 100px; overflow-y: scroll">
+    <div id="chat-text" style="margin-top: 500px; width: 500px; height: 100px; overflow-y: scroll;">
       <div>Hello!</div>
     </div>
     <form id="chat-form" action="">
@@ -87,7 +88,8 @@
     images.maps['forest'].src = '/client/img/forest.png';
 
     const ctx = document.getElementById("ctx").getContext("2d");
-    ctx.font = '30px Arial';
+    const ctxUi = document.getElementById("ctx-ui").getContext("2d");
+    ctxUi.font = '30px Arial';
 
     const Player = initPack => {
       const self = {};
@@ -232,9 +234,15 @@
     };
 
     const drawScore = () => {
-      ctx.fillStyle = 'white';
-      ctx.fillText(Player.list[selfId].score, 10, 30);
+      if (lastScore === Player.list[selfId].score) {
+        return;
+      }
+      lastScore = Player.list[selfId].score
+      ctxUi.clearRect(0, 0, 500, 500);
+      ctxUi.fillStyle = 'white';
+      ctxUi.fillText(Player.list[selfId].score, 10, 30);
     };
+    let lastScore = null;
 
     document.onkeydown = event => {
       if (event.keyCode === 68) { // d key
