@@ -953,7 +953,8 @@ note the most perf to use canvas for everything, espcially since it doesnt make 
 * fix the mouse pointer issue - shooting is relative to the center of the canvas
 * clean up UI / UX
 * use WASD and other keys without breaking chat
-* chat history not shown when new players join. save chats in general. save player stuff in general
+* chat history not shown when new players join. save chats in general. also global chats should probably be restricted by map. chat also needs autoscroll.
+* save player stuff in general
 * turn DEBUG off. also wrap in try/catch so that server doesn't shut down on bad eval
 * soooo much potential...
 * see phone notes

@@ -36,7 +36,10 @@
 
     <div id="belowGame" style="margin-top: 520px;">
       <div id="chat-text" style="width: 500px; height: 100px; overflow-y: scroll;">
-        <div>Hello! Chat below:</div>
+        <div>Hello! Welcome to chat.
+          <p>To PM specific users, use:</p>
+          <p style="color:rgb(1, 91, 91)">@username message</p>
+        </div>
       </div>
       <form id="chat-form" action="">
         <input id="chat-input" type="text" style="width: 500px;">
@@ -321,6 +324,12 @@
       event.preventDefault();
       if (chatInput.value[0] === '/') {
         socket.emit('evalServer', chatInput.value.slice(1));
+      }
+      else if (chatInput.value[0] === '@') {
+        socket.emit('sendPrivateMsgToServer', {
+          username: chatInput.value.slice(1).split(' ')[0],
+          message: chatInput.value.split(' ').splice(1).join(' '),
+        });
       } else {
         socket.emit('sendMsgToServer', chatInput.value);
       }

@@ -207,7 +207,22 @@ Player.onConnect = (socket, username) => {
     // const playerName = ("" + socket.id).slice(2,7);
     for (let i in SOCKET_LIST) {
       let socket = SOCKET_LIST[i];
-      socket.emit('addToChat', `${player.username}: ${data}`);
+      socket.emit('addToChat', `${player.username} to all: ${data}`);
+    }
+  });
+
+  socket.on('sendPrivateMsgToServer', data => { // data {username & message}
+    let recipientSocket = null;
+    for (let i in Player.list) {
+      if (Player.list[i].username === data.username) {
+        recipientSocket = SOCKET_LIST[i]; // or SOCKET_LIST[Player.list[i].id]
+      }
+    }
+    if (!recipientSocket) {
+      socket.emit('addToChat', `${data.username} is not online`);
+    } else {
+      recipientSocket.emit('addToChat', `PM from ${player.username}: ${data.message}`);
+      socket.emit('addToChat', `PM to ${data.username}: ${data.message}`);
     }
   });
 
