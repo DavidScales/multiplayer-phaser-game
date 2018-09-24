@@ -944,6 +944,84 @@ https://nodejs.org/en/docs/guides/simple-profiling/
 note the most perf to use canvas for everything, espcially since it doesnt make sense for interactive elements like buttons. so to have interactive ui in the game, basically just going to create the ui components in html on top of the canvas, similar to how i already stacked multuple canvases on top of each other to eliminate excess redraws of more static things.
 
 
+### using modules
+
+everything being in one file is of course terrible and has been bothering me for dayyyyyz.
+
+pulled the Entity, PLayer, and Bullet classes out of app.js (the main server file) and put them into Entity.js
+
+Node supports ES5 sytax of module.exports & require. basically that looks like this:
+
+app.js now "requires" / imports the classes from the Entity.js file:
+
+    // app.js
+    const { Entity, Player, Bullet } = require('./Entity.js');
+
+require does exactly waht you would think. the {} is object destructuring I believe which basically just saves you from having to do
+
+    // app.js
+    const thing = require('./Entity.js');
+    const Entity = thing.Entity
+    const PLayer = thing.PLayer
+    const Bullet = thing.Bullet
+
+The corresponding syntax for the file being imported (Entity.js) is:
+
+    //Entity.js
+    module.exports = {
+      Entity: Entity,
+      Player: Player,
+      Bullet: Bullet,
+    };
+
+Which just exports a regular object, in this case the value of each key in the object is the corresponding class object defined in the same file.
+
+Alternatively es6 allows another syntax:
+
+//app.js
+import { Entity, Player, Bullet } from './Entity.js';
+
+// Entity.js
+export { Entity, Player, Bullet };
+
+which is admittely a little more clear IMO. but for now gonna stick with es5 because it matches the style of the rest of my code which is currently still using require. OH and because it looks like node 8 doesnt really support that. shoudl read into it more later. TODO
+https://stackoverflow.com/questions/44985913/nodejs-8-import-module-require-or-import
+
+The export/import syntax isnt super important i dont think. but the real thing i learned here was about scoping. before I had assumed that if I did
+
+// player.js
+game += '!';
+
+// app.js
+const game = 'fun';
+{ Player } = require('./Player.js');
+
+I though the functions in Player.js would have access to objects in app.js, since I thought of this as the player.js functions being imported and run in the app.js scope. But thats not the case.
+
+The solution is to keep modules as... welll... modular as possible. which makes sense. so player.js should really stand super alone. and methods can be used to share state, so instead of
+
+// player.js
+const level = 5;
+
+// app.js
+{ Player } = require('./Player.js');
+if (level > 10) { ... }
+
+I could do:
+
+// player.js
+const level = 5;
+Player.getLevel = () => {
+  return level;
+};
+
+// app.js
+{ Player } = require('./Player.js');
+if (Player.getLevel() > 10) { ... }
+
+
+
+
 ## Todos
 
 * sessions to stay logged in. log out button
