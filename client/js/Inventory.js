@@ -4,13 +4,13 @@ I can probably fix this with a build process later on that compiles client files
 at build time.
 */
 
-Inventory = (socket, server) => {
+Inventory = (items, socket, server) => {
   const self = {
     // TODO: seems like items would make more sense as an object, so that
     // I dont have to loop through it for add / remove / find operations
     // could test with Dev Tools profiling!
     // like Player.list and Item.list, Bullet.list, etc.
-    items: [], // { id: 'itemId', amount: 1 }
+    items: items, // { id: 'itemId', amount: 1 }
     socket: socket,
     server: server,
   }
@@ -79,7 +79,7 @@ Inventory = (socket, server) => {
   if (self.server) {
     socket.on('useItem', itemId => {
       if (!self.hasItem(itemId, 1)) {
-        console.log('Cheater');
+        console.log('Potential cheater');
         return;
       }
 

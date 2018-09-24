@@ -97,7 +97,7 @@
     };
 
     // shouldnt this be a player attribute? - no because its tracked on the server
-    const inventory = Inventory(socket, false); // second param is "server"
+    const inventory = Inventory([], socket, false); // second param is "server"
     socket.on('updateInventory', items => {
       inventory.items = items;
       inventory.refreshRender();

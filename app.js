@@ -11,21 +11,7 @@ app.use('/client', express.static(`${__dirname}/client`));
 console.log(`Server listening on localhost:${port}`);
 server.listen(port);
 
-const MongoClient = require('mongodb').MongoClient;
-const assert = require('assert');
-const url = 'mongodb://localhost:27017';
-const dbName = 'myGame';
-const initDb = async (url, dbName) => {
-  try {
-    const client = await MongoClient.connect(url, { useNewUrlParser: true });
-    console.log('Connected successfully to database');
-    return client.db(dbName);
-  } catch (err) {
-    console.log(err);
-  }
-};
-const dbPromise = initDb(url, dbName);
-
+require('./Database.js');
 // const { Entity, Player } = require('./Entity.js');
 require('./Entity.js');
 require('./client/js/Inventory.js'); // see note in Inventory.js about global objects
@@ -34,29 +20,6 @@ const SOCKET_LIST = {};
 
 const DEBUG = true;
 
-// TODO: sanitization and potential security issues
-// TODO: passwords should be salted hashes
-const isValidUser = async data => {
-  const db = await dbPromise;
-  const users = await db.collection('account')
-    .find(data)
-    .toArray();
-  return users.length === 1;
-};
-const isUsernameTaken = async data => {
-  const db = await dbPromise;
-  const users = await db.collection('account')
-    .find({username: data.username })
-    .toArray();
-  return users.length === 1;
-};
-const addUser = async data => {
-  const db = await dbPromise;
-  const users = await db.collection('account')
-    .insertOne(data)
-  assert.equal(1, users.insertedCount);
-};
-
 const io = require('socket.io')(server, {});
 io.sockets.on('connection', socket => {
   socket.id = Math.random();
@@ -64,8 +27,9 @@ io.sockets.on('connection', socket => {
   console.log(`socket connection, id: ${socket.id}`);
 
   socket.on('signIn', async data => {
-    if (await isValidUser(data)) {
-      Player.onConnect(socket, data.username);
+    if (await Database.isValidUser(data)) {
+      const progress = await Database.getPlayerProgress(data.username);
+      Player.onConnect(socket, data.username, progress);
       socket.emit('signInResponse', { success: true });
     } else {
       socket.emit('signInResponse', { success: false });
@@ -73,10 +37,10 @@ io.sockets.on('connection', socket => {
   });
 
   socket.on('signUp', async data => {
-    if (await isUsernameTaken(data)) {
+    if (await Database.isUsernameTaken(data)) {
       socket.emit('signUpResponse', { success: false });
     } else {
-      await addUser(data);
+      await Database.addUser(data);
       socket.emit('signUpResponse', { success: true });
     }
   });

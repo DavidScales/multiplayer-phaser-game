@@ -76,7 +76,7 @@ Player = config => {
   self.hp = 10;
   self.hpMax = 10;
   self.score = 0;
-  self.inventory = Inventory(config.socket, true); // second param is "server"
+  self.inventory = Inventory(config.progress.items, config.socket, true); // boolean is "server"
 
   const superUpdate = self.update;
   self.update = () => {
@@ -154,7 +154,7 @@ Player = config => {
   return self;
 };
 Player.list = {};
-Player.onConnect = (socket, username) => {
+Player.onConnect = (socket, username, progress) => {
   let map = 'forest'; // this is also hard coded in Entity. abstract.
   if (Math.random() < 0.5) {
     map = 'field';
@@ -164,8 +164,11 @@ Player.onConnect = (socket, username) => {
     map: map,
     username: username,
     socket: socket,
+    progress: progress,
     //x, y, etc. from db
   });
+
+  player.inventory.refreshRender();
 
   socket.on('keyPress', data => {
     if (data.inputId === 'left') {
@@ -233,6 +236,12 @@ Player.getAllInitPack = () => {
   return existingPlayers;
 };
 Player.onDisconnect = socket => {
+  let player = Player.list[socket.id];
+  if (!player) { return; }
+  Database.savePlayerProgress({
+    username: player.username,
+    items: player.inventory.items,
+  });
   delete Player.list[socket.id];
   removePack.players.push(socket.id);
 };

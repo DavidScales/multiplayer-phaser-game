@@ -1047,9 +1047,22 @@ Client > index.html
 * have inventory div for displaying inventory items in html
 
 
+### saving player progress
+
+in this case basically just items, but could be anything
+
+when creating new users, add empty items property to DB
+
+when users disconnect, write existing items to DB
+
+when users connect & inventory  is instantiated on server, pass in existing content from DB
+* if user is new, will be empty
+* if user is returning, will be thier inventory from last play
 
 
 ## Todos
+* needs TESTS (auth, inventory, chat, etc.)
+* clean up notes
 * need better dependency management / scoping. was using "require" but doesn't
 work for Inventory.js which is also used on the client. could potentially be fixed
 by a build system that compiles JS
