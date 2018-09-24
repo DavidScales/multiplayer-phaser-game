@@ -1,7 +1,7 @@
 const initPack = { players: {}, bullets: {} };
 const removePack = { players: {}, bullets: {} };
 
-const Entity = (override) => {
+Entity = (override) => {
   const self = {
     x: 250,
     y: 250,
@@ -62,7 +62,7 @@ Entity.getFrameUpdateData = () => {
   return packs;
 };
 
-const Player = config => {
+Player = config => {
   const self = Entity(config);
   self.number = "" + Math.floor(10 * Math.random());
   self.username = config.username;
@@ -76,6 +76,7 @@ const Player = config => {
   self.hp = 10;
   self.hpMax = 10;
   self.score = 0;
+  self.inventory = Inventory(config.socket, true); // second param is "server"
 
   const superUpdate = self.update;
   self.update = () => {
@@ -88,6 +89,11 @@ const Player = config => {
   };
 
   self.shootBullet = (angle) => {
+    // just for testing
+    if (Math.random() < 0.1) {
+      self.inventory.addItem('potion', 1);
+    }
+
     Bullet({
       parent: self.id,
       angle: angle,
@@ -157,6 +163,7 @@ Player.onConnect = (socket, username) => {
     id: socket.id,
     map: map,
     username: username,
+    socket: socket,
     //x, y, etc. from db
   });
 
@@ -239,7 +246,7 @@ Player.update = () => {
   return pack;
 };
 
-const Bullet = (config) => {
+Bullet = (config) => {
   const self = Entity(config);
   self.id = Math.random();
   self.angle = config.angle;
@@ -318,9 +325,9 @@ Bullet.getAllInitPack = () => {
   return existingBullets;
 };
 
-module.exports = {
-  Entity: Entity,
-  Player: Player,
-  Bullet: Bullet,
-};
+// module.exports = {
+//   Entity: Entity,
+//   Player: Player,
+//   Bullet: Bullet,
+// };
 

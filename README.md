@@ -1020,10 +1020,39 @@ Player.getLevel = () => {
 if (Player.getLevel() > 10) { ... }
 
 
+#### Inventory & item system
+
+Server & Client > Inventory.js
+* implements an Item class
+  * item is just an object with id, name, and event (function) properties
+  * Item class tracks all items in Item.list
+* a couple Item instances are created
+* implements an Inventory class
+  * has an items property for keeping a list of items
+  * uses a "server" flag to dsitinquish if file is used on client or server and functions behavior differently for different situations. kinda hacky.
+  * has add / check / remove methods which do exactly what you'd think, modifying the items preperty list of items
+    * these methods also call inventory.refreshRender()
+  * has a refreshRender() method which is more complex
+    * in the server environment (determined from the "server" flag that was passed on instantiation) the server emits an updateInventory event to the client with all the player inventory items
+      * meanwhile the client listens for this event and does: sets client inventory to inventory from server, calls inventory.refreshRender()
+    * in the client environment (determined from the "server" flag that was passed on instantiation), clears the inventory div and populates it with buttons for each type of inventory item
+      * the buttons are bound with the item events, which are looked up in Item.list
+  * in server environment (again from flag), listens for useItem event, which checks if player has item, looks up the item in the Item.list and calls the Item's event with the player instance
+
+Server > Entity.js
+* player has inventory property (server = true)
+
+Client > index.html
+* inventory is global object (server = false)
+* have inventory div for displaying inventory items in html
+
+
 
 
 ## Todos
-
+* need better dependency management / scoping. was using "require" but doesn't
+work for Inventory.js which is also used on the client. could potentially be fixed
+by a build system that compiles JS
 * sessions to stay logged in. log out button
 * consider sprite animation library
 * invesigate socket.io "rooms" & how to make multiple serves/games (https://nodejs.org/api/cluster.html)
@@ -1036,6 +1065,7 @@ if (Player.getLevel() > 10) { ... }
 * turn DEBUG off. also wrap in try/catch so that server doesn't shut down on bad eval
 * soooo much potential...
 * see phone notes
+* see Raining Chain game for inspiration & source code for examples
 * for glitch hosting, will probably need more info in package.json like the engine, and start command. example glitch package.json:
 
     {

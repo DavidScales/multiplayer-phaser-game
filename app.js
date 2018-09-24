@@ -26,7 +26,9 @@ const initDb = async (url, dbName) => {
 };
 const dbPromise = initDb(url, dbName);
 
-const { Entity, Player, Bullet } = require('./Entity.js');
+// const { Entity, Player } = require('./Entity.js');
+require('./Entity.js');
+require('./client/js/Inventory.js'); // see note in Inventory.js about global objects
 
 const SOCKET_LIST = {};
 

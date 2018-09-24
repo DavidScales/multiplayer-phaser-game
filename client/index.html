@@ -41,6 +41,7 @@
           <p style="color:rgb(1, 91, 91)">@username message</p>
         </div>
       </div>
+      <div id="inventory"></div>
       <form id="chat-form" action="">
         <input id="chat-input" type="text" style="width: 500px;">
       </form>
@@ -50,6 +51,7 @@
 
   <!-- maybe use CDN? -->
   <script src="/socket.io/socket.io.js"></script>
+  <script src="/client/js/Inventory.js"></script>
   <script>
     const WIDTH = 500;
     const HEIGHT = 500;
@@ -93,6 +95,13 @@
     const changeMap = () => {
       socket.emit('changeMap');
     };
+
+    // shouldnt this be a player attribute? - no because its tracked on the server
+    const inventory = Inventory(socket, false); // second param is "server"
+    socket.on('updateInventory', items => {
+      inventory.items = items;
+      inventory.refreshRender();
+    });
 
     // game
 
