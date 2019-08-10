@@ -55,34 +55,80 @@ const listener = server.listen(PORT, function() {
 });
 
 const SOCKET_MAP = {};
+const PLAYER_MAP = {};
+
+// TODO: should be a class? and imported
+const Player = (id) => {
+  const self = {
+    x: 250,
+    y: 250,
+    id:id,
+    number: "" + Math.floor(10 * Math.random()),
+    pressingRight: false,
+    pressingLeft: false,
+    pressingUp: false,
+    pressingDown: false,
+    maxSpeed: 10
+  };
+  self.updatePosition = () => {
+    if (self.pressingRight) {
+      self.x += self.maxSpeed;
+    }
+    if (self.pressingLeft) {
+      self.x -= self.maxSpeed;
+    }
+    if (self.pressingUp) {
+      self.y -= self.maxSpeed;
+    }
+    if (self.pressingDown) {
+      self.y += self.maxSpeed;
+    }
+  };
+  return self
+};
 
 const io = require('socket.io')(server);
 
 io.on('connection', (socket) => {
   socket.id = Math.random();
-  socket.x = 0;
-  socket.y = 0;
-  socket.number = "" + Math.floor(10 * Math.random());
   SOCKET_MAP[socket.id] = socket;
+  const player = Player(socket.id);
+  PLAYER_MAP[socket.id] = player;
   console.log(`a user connected (${socket.id})`);
 
   socket.on('disconnect', () => {
     // Note: disconnect doesn't accept "socket" argument
     console.log(`user disconnected (${socket.id})`);
     delete SOCKET_MAP[socket.id];
+    delete PLAYER_MAP[socket.id];
+  });
+
+  // TODO: switch w/ map?
+  socket.on('keyPress', (data) => {
+    if (data.inputId == 'right') {
+      player.pressingRight = data.state;
+    }
+    else if (data.inputId == 'left') {
+      player.pressingLeft = data.state;
+    }
+    else if (data.inputId == 'up') {
+      player.pressingUp = data.state;
+    }
+    else if (data.inputId == 'down') {
+      player.pressingDown = data.state;
+    }
   });
 })
 
 setInterval(() => {
   const pack = [];
-  for (let id in SOCKET_MAP) {
-    let socket = SOCKET_MAP[id];
-    socket.x++;
-    socket.y++;
+  for (let id in PLAYER_MAP) {
+    let player = PLAYER_MAP[id];
+    player.updatePosition();
     pack.push({
-      number: socket.number,
-      x: socket.x,
-      y: socket.y
+      number: player.number,
+      x: player.x,
+      y: player.y
     })
   }
   // Looks like you can emit to all sockets directly (https://socket.io/get-started/chat/)
