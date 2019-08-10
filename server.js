@@ -53,3 +53,15 @@ const server = require('http').Server(app);
 const listener = server.listen(PORT, function() {
   console.log('Your app is listening on port ' + listener.address().port);
 });
+
+const io = require('socket.io')(server);
+// io.sockets.on('connection', (socket) => {
+io.on('connection', (socket) => {
+  console.log('a user connected');
+  socket.on('greeting', (data) => {
+    console.log(`recieved greeting from client: ${data.content}`);
+  });
+  socket.on('disconnect', () => {
+    console.log('user disconnected');
+  });
+})
