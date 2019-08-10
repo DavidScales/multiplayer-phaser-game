@@ -54,14 +54,41 @@ const listener = server.listen(PORT, function() {
   console.log('Your app is listening on port ' + listener.address().port);
 });
 
+const SOCKET_MAP = {};
+
 const io = require('socket.io')(server);
-// io.sockets.on('connection', (socket) => {
+
 io.on('connection', (socket) => {
-  console.log('a user connected');
-  socket.on('greeting', (data) => {
-    console.log(`recieved greeting from client: ${data.content}`);
-  });
+  socket.id = Math.random();
+  socket.x = 0;
+  socket.y = 0;
+  socket.number = "" + Math.floor(10 * Math.random());
+  SOCKET_MAP[socket.id] = socket;
+  console.log(`a user connected (${socket.id})`);
+
   socket.on('disconnect', () => {
-    console.log('user disconnected');
+    // Note: disconnect doesn't accept "socket" argument
+    console.log(`user disconnected (${socket.id})`);
+    delete SOCKET_MAP[socket.id];
   });
 })
+
+setInterval(() => {
+  const pack = [];
+  for (let id in SOCKET_MAP) {
+    let socket = SOCKET_MAP[id];
+    socket.x++;
+    socket.y++;
+    pack.push({
+      number: socket.number,
+      x: socket.x,
+      y: socket.y
+    })
+  }
+  // Looks like you can emit to all sockets directly (https://socket.io/get-started/chat/)
+  // io.emit('some event', { for: 'everyone' });
+  for (let id in SOCKET_MAP) {
+    let socket = SOCKET_MAP[id];
+    socket.emit('newPosition', pack);
+  }
+}, 1000/25);
