@@ -3,6 +3,8 @@ const bodyParser = require('body-parser');
 const app = express();
 app.use(bodyParser.urlencoded({ extended: true }));
 
+const PORT = 8082;
+
 app.use(express.static('public'));
 
 /** API sample reference for later */
@@ -47,6 +49,7 @@ app.get('/', function(request, response) {
 //   });
 // });
 
-const listener = app.listen(process.env.PORT, function() {
+const server = require('http').Server(app);
+const listener = server.listen(PORT, function() {
   console.log('Your app is listening on port ' + listener.address().port);
 });
