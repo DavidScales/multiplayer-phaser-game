@@ -11,33 +11,15 @@ socket.on('newPosition', data => {
     }
 });
 
-// TODO: ref
+const keyMap = {
+    68: 'right', // d
+    65: 'left', // a
+    87: 'up', // w
+    83: 'down', // d
+}
 document.onkeydown = (event) => {
-    if (event.keyCode === 68) { // d
-        socket.emit('keyPress', { inputId: 'right' , state: true })
-    }
-    else if (event.keyCode === 65) { // a
-        socket.emit('keyPress', { inputId: 'left' , state: true })
-    }
-    else if (event.keyCode === 87) { // w
-        socket.emit('keyPress', { inputId: 'up' , state: true })
-    }
-    else if (event.keyCode === 83) { // 2
-        socket.emit('keyPress', { inputId: 'down' , state: true })
-    }
+    socket.emit('keyPress', { inputId: keyMap[event.keyCode] , state: true })
 };
-
 document.onkeyup = (event) => {
-    if (event.keyCode === 68) { // d
-        socket.emit('keyPress', { inputId: 'right' , state: false })
-    }
-    else if (event.keyCode === 65) { // a
-        socket.emit('keyPress', { inputId: 'left' , state: false })
-    }
-    else if (event.keyCode === 87) { // w
-        socket.emit('keyPress', { inputId: 'up' , state: false })
-    }
-    else if (event.keyCode === 83) { // 2
-        socket.emit('keyPress', { inputId: 'down' , state: false })
-    }
+    socket.emit('keyPress', { inputId: keyMap[event.keyCode] , state: false })
 };
