@@ -22,11 +22,12 @@ const listener = server.listen(PORT, function() {
 const SOCKET_MAP = {};
 const PLAYER_MAP = {};
 
-const Player = require('./server/player.js');
+const Player = require('./server/player');
+const getRandomInt = require('./server/util').getRandomInt;
 const io = require('socket.io')(server);
 
 io.on('connection', (socket) => {
-  const id = Math.random();
+  const id = getRandomInt(100000, 999999);
   socket.id = id;
   SOCKET_MAP[id] = socket;
   const player = new Player(id);
