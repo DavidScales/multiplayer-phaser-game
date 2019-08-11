@@ -14,51 +14,34 @@ app.get('/', function(request, response) {
 
 const server = require('http').Server(app);
 const listener = server.listen(PORT, function() {
-  console.log('Your app is listening on port ' + listener.address().port);
+  console.log('App is listening on port ' + listener.address().port);
 });
 
 /** Websockets and game logic */
 
-const SOCKET_MAP = {};
-const PLAYER_MAP = {};
+const SOCKETS = {};
 
-const Player = require('./server/player');
-const getRandomInt = require('./server/util').getRandomInt;
+const { Player } = require('./server/entities');
+const { generateId } = require('./server/util');
 const io = require('socket.io')(server);
 
 io.on('connection', (socket) => {
-  const id = getRandomInt(100000, 999999);
-  socket.id = id;
-  SOCKET_MAP[id] = socket;
-  const player = new Player(id);
-  PLAYER_MAP[id] = player;
-  console.log(`a user connected (${id})`);
+  socket.id = generateId();
+  SOCKETS[socket.id] = socket;
+  console.log(`A user connected (${socket.id})`);
+
+  Player.onConnect(socket);
 
   socket.on('disconnect', () => {
-    // Note: disconnect doesn't accept "socket" argument
-    console.log(`user disconnected (${id})`);
-    delete SOCKET_MAP[id];
-    delete PLAYER_MAP[id];
-  });
-
-  socket.on('keyPress', (data) => {
-    if      (data.inputId == 'right') { player.pressingRight = data.state; }
-    else if (data.inputId == 'left')  { player.pressingLeft = data.state; }
-    else if (data.inputId == 'up')    { player.pressingUp = data.state; }
-    else if (data.inputId == 'down')  { player.pressingDown = data.state; }
+    // Note: disconnect event doesn't accept "socket" argument
+    console.log(`User disconnected (${socket.id})`);
+    delete SOCKETS[socket.id];
+    Player.onDisconnect(socket);
   });
 })
 
 setInterval(() => {
-  const pack = [];
-  for (let id in PLAYER_MAP) {
-    let player = PLAYER_MAP[id];
-    player.updatePosition();
-    pack.push({
-      number: player.number,
-      x: player.x,
-      y: player.y
-    })
-  }
+  // TODO: rename
+  const pack = Player.updatePlayers();
   io.emit('newPosition', pack);
 }, 1000/25);
