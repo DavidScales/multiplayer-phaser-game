@@ -21,6 +21,9 @@ describe('Web sockets', (done) => {
     it('all clients recieve all player coordinates', async () => {
         expect.fail('TODO')
     });
+    it('keyboard input uhh... works', async () => {
+        expect.fail('TODO')
+    });
     /** Examples
      * http://liamkaufman.com/blog/2012/01/28/testing-socketio-with-mocha-should-and-socketio-client/
      * https://alexzywiak.github.io/testing-socket-io-with-mocha-and-chai/index.html
