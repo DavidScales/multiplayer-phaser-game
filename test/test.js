@@ -19,13 +19,22 @@ describe('Site status and smoketests', () => {
 // Websocket tests are pretty tough!
 describe('Web sockets', (done) => {
     it('all clients recieve all player coordinates', async () => {
-        expect.fail('TODO')
-    });
-    it('keyboard input uhh... works', async () => {
-        expect.fail('TODO')
+        expect.fail('TODO');
     });
     /** Examples
      * http://liamkaufman.com/blog/2012/01/28/testing-socketio-with-mocha-should-and-socketio-client/
      * https://alexzywiak.github.io/testing-socket-io-with-mocha-and-chai/index.html
      * */
+});
+
+describe('Player', (done) => {
+    it('new player is added to players object on connect', async () => {
+        expect.fail('TODO');
+    });
+    it('player is removed from players object on disconnect', () => {
+        expect.fail('TODO');
+    });
+    it('player coordinates are updated on key press', () => {
+        expect.fail('TODO');
+    });
 });
