@@ -38,3 +38,12 @@ describe('Player', (done) => {
         expect.fail('TODO');
     });
 });
+
+describe('Bullets', (done) => {
+    it('bullets are created on user key press', async () => {
+        expect.fail('TODO');
+    });
+    it('bullets are removed after X frames', () => {
+        expect.fail('TODO');
+    });
+});

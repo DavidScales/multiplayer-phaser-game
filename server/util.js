@@ -5,7 +5,7 @@ const getRandomInt = (min, max) => {
 };
 
 const generateId = () => {
-    return getRandomInt(100000, 999999)
+    return getRandomInt(10000000, 99999999)
 }
 
 module.exports = {

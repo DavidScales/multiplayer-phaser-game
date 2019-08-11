@@ -1,3 +1,5 @@
+const { generateId } = require('./util');
+
 class Entity {
     constructor() {
         this.id = '';
@@ -74,13 +76,53 @@ class Player extends Entity {
 // Static properties (not available in JavaScript I believe)
 Player.players = {};
 
-// class Bullet extends Entity {
-//     constructor(id) {
-//         super(id);
-//     }
-// }
+class Bullet extends Entity {
+    constructor(angle) {
+        super();
+        this.id = generateId();
+        this.speedX = Math.cos(angle / 180 * Math.PI) * 10;
+        this.speedY = Math.sin(angle / 180 * Math.PI) * 10;
+        this.timer = 0;
+        this.toRemove = false;
+        Bullet.bullets[this.id] = this;
+    }
+    update() {
+        if (this.timer++ > Bullet.durationInFrames) { this.toRemove = true; }
+        super.update();
+    }
+    // TODO: unsure
+    static destroy(id) {
+        delete Bullet.bullets[id];
+    }
+    static updateBullets() {
+        // TODO: temp
+        if (Math.random() < 0.1) {
+            new Bullet(Math.random() * 360);
+        }
+
+        // TODO: clean up
+        const pack = [];
+        for (let id in Bullet.bullets) {
+            let bullet = Bullet.bullets[id];
+
+            // TODO: unsure
+            if (bullet.toRemove) {
+                Bullet.destroy(bullet.id);
+            }
+
+            bullet.update();
+            pack.push({
+                x: bullet.x,
+                y: bullet.y
+            });
+        }
+        return pack;
+    }
+}
+Bullet.bullets = {};
+Bullet.durationInFrames = 100;
 
 module.exports = {
     Player: Player,
-    // Bullet: Bullet
+    Bullet: Bullet
 };

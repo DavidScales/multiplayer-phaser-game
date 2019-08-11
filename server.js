@@ -21,7 +21,7 @@ const listener = server.listen(PORT, function() {
 
 const SOCKETS = {};
 
-const { Player } = require('./server/entities');
+const { Player, Bullet } = require('./server/entities');
 const { generateId } = require('./server/util');
 const io = require('socket.io')(server);
 
@@ -42,6 +42,9 @@ io.on('connection', (socket) => {
 
 setInterval(() => {
   // TODO: rename
-  const pack = Player.updatePlayers();
-  io.emit('newPosition', pack);
+  const pack = {
+    players: Player.updatePlayers(),
+    bullets: Bullet.updateBullets()
+  }
+  io.emit('newPositions', pack);
 }, 1000/25);
