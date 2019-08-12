@@ -72,6 +72,9 @@ class Player extends Entity {
         }
         return pack;
     }
+    static getNumPlayers() {
+        return Object.keys(Player.players).length;
+    }
 }
 // Static properties (not available in JavaScript I believe)
 Player.players = {};
