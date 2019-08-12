@@ -2,8 +2,12 @@
 
 const express = require('express');
 const bodyParser = require('body-parser');
+const minimist = require('minimist');
 const app = express();
-const PORT = 8082;
+
+// Port cannot be hard-coded for Glitch
+const args = minimist(process.argv.slice(2));
+const PORT = args.port || process.env.PORT;
 
 app.use(bodyParser.urlencoded({ extended: true }));
 app.use(express.static('public'));
@@ -13,7 +17,7 @@ app.get('/', function(request, response) {
 });
 
 const server = require('http').Server(app);
-const listener = server.listen(PORT, function() {
+const listener = server.listen(PORT, () => {
   console.log('App is listening on port ' + listener.address().port);
 });
 
@@ -48,3 +52,7 @@ setInterval(() => {
   }
   io.emit('newPositions', pack);
 }, 1000/25);
+
+module.exports = {
+  server: listener, // Note
+};
