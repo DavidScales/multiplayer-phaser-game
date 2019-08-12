@@ -55,4 +55,5 @@ setInterval(() => {
 
 module.exports = {
   server: listener, // Note
+  Player: Player,
 };
