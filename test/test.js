@@ -46,15 +46,41 @@ describe('Site status and smoketests', () => {
     });
 });
 
-// Websocket tests are pretty tough!
-describe.skip('Web sockets tests', () => {
+describe('Chat tests', () => {
 
-    it('all clients recieve all player coordinates', async () => {
+    it('players can send messages to all other players', (done) => {
+        expect.fail('TODO');
+    });
+    // TODO: probably a good candidate for selenium FT
+});
+
+describe('Player tests', () => {
+
+    it('new player is added to players object on connect', (done) => {
+        expect(Player.getNumPlayers()).to.equal(0);
+
+        const client1 = io.connect(baseUrl, socketOptions);
+        client1.on('connect', () => {
+            expect(Player.getNumPlayers()).to.equal(1);
+            client1.disconnect();
+            done();
+        });
+    });
+
+    it.skip('player is removed from players object on disconnect', () => {
+        expect.fail('TODO');
+    });
+
+    it.skip('player coordinates are updated on key press', () => {
         expect.fail('TODO');
     });
 });
 
 describe('Player tests', () => {
+
+    it.skip('all clients recieve all player coordinates', () => {
+        expect.fail('TODO');
+    });
 
     it('new player is added to players object on connect', (done) => {
         expect(Player.getNumPlayers()).to.equal(0);

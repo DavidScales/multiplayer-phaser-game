@@ -42,6 +42,13 @@ io.on('connection', (socket) => {
     delete SOCKETS[socket.id];
     Player.onDisconnect(socket);
   });
+
+  socket.on('sendMessageToServer', (data) => {
+    // TODO: sanitize input & probably store peristently
+    const playerName = "" + socket.id; // TODO: change
+    const message = `<strong>${playerName}</strong>: ${data}`;
+    io.emit('addToChat', message);
+  });
 })
 
 setInterval(() => {

@@ -1,7 +1,22 @@
 const ctx = document.querySelector('canvas#ctx').getContext('2d');
 ctx.font = '30px Roboto';
 
+const chatText = document.querySelector('div#chat-text');
+const chatInput = document.querySelector('input#chat-input');
+const chatForm = document.querySelector('form#chat-form');
+
 const socket = io();
+
+socket.on('addToChat', (data) => {
+    // TODO: sanitize of course
+    chatText.innerHTML += `<p>${data}</p>`;
+});
+
+chatForm.addEventListener('submit', (event) => {
+    event.preventDefault()
+    socket.emit('sendMessageToServer', chatInput.value);
+    chatInput.value = '';
+})
 
 socket.on('newPositions', data => {
     ctx.clearRect(0, 0, 500, 500);
