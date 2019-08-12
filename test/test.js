@@ -34,19 +34,36 @@ afterEach((done) => {
 
 describe('Site status and smoketests', () => {
 
-    it('Home page loads', async () => {
+    it('home page loads', async () => {
         const req = await request(server).get('/');
         expect(req.status).to.equal(200);
         expect(req.text).to.include(`Dave's Game`);
     });
 
-    it('Fake page does not load', async () => {
+    it('fake page does not load', async () => {
         const req = await request(server).get('/fake');
         expect(req.status).to.equal(404);
     });
+
+    it('does not allow server "eval" debugging', (done) => {
+        // TODO: Test works for now, but fails with Timeout instead of assertion :(
+        let response = false;
+        var client1 = io.connect(baseUrl, socketOptions);
+        client1.on('connect', () => {
+            client1.on('evalAnswer', (data) => {
+                response = true;
+            });
+            client1.emit('evalServer', 'Some malicious code');
+        });
+        setTimeout(() => {
+            expect(response).to.be.false;
+            client1.disconnect();
+            done();
+        }, 250);
+    });
 });
 
-describe('Chat tests', () => {
+describe.skip('Chat tests', () => {
 
     it('players can send messages to all other players', (done) => {
         expect.fail('TODO');

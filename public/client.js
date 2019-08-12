@@ -7,6 +7,10 @@ const chatForm = document.querySelector('form#chat-form');
 
 const socket = io();
 
+socket.on('evalAnswer', (data) => {
+    console.log(data);
+});
+
 socket.on('addToChat', (data) => {
     // TODO: sanitize of course
     chatText.innerHTML += `<p>${data}</p>`;
@@ -14,7 +18,11 @@ socket.on('addToChat', (data) => {
 
 chatForm.addEventListener('submit', (event) => {
     event.preventDefault()
-    socket.emit('sendMessageToServer', chatInput.value);
+    if (chatInput.value[0] === '/') {
+        socket.emit('evalServer', chatInput.value.slice(1));
+    } else {
+        socket.emit('sendMessageToServer', chatInput.value);
+    }
     chatInput.value = '';
 })
 

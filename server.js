@@ -8,6 +8,7 @@ const app = express();
 // Port cannot be hard-coded for Glitch
 const args = minimist(process.argv.slice(2));
 const PORT = args.port || process.env.PORT;
+const DEBUG = args.debug;
 
 app.use(bodyParser.urlencoded({ extended: true }));
 app.use(express.static('public'));
@@ -48,6 +49,17 @@ io.on('connection', (socket) => {
     const playerName = "" + socket.id; // TODO: change
     const message = `<strong>${playerName}</strong>: ${data}`;
     io.emit('addToChat', message);
+  });
+
+  socket.on('evalServer', (data) => {
+    if (!DEBUG) { return }
+    let result = 'undefined';
+    try {
+      result = eval(data);
+    } catch (error) {
+      console.log('Server debug eval failed:', error);
+    }
+    socket.emit('evalAnswer', result);
   });
 })
 
