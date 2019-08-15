@@ -29,14 +29,24 @@ const SOCKETS = {};
 const USERS = {
   'dave': 'admin'
 };
-const isUserNameTaken = (username) => {
-  return USERS[username];
+// TODO: consider promise-based alternatives
+const isUserNameTaken = (username, cb) => {
+  setTimeout(() => {
+    cb(USERS[username]);
+  }, 10);
+
 };
-const addUser = (username, password) => {
-  return USERS[username] = password;
+const addUser = (username, password, cb) => {
+  setTimeout(() => {
+    USERS[username] = password;
+    cb();
+  }, 10);
+
 };
-const isValidPassword = (username, password) => {
-  return USERS[username] == password;
+const isValidPassword = (username, password, cb) => {
+  setTimeout(() => {
+    cb(USERS[username] == password);
+  }, 10);
 };
 
 const { Player, Bullet } = require('./server/entities');
@@ -49,23 +59,28 @@ io.on('connection', (socket) => {
   console.log(`A user connected (${socket.id})`);
 
   socket.on('signIn', (data) => {
-    if (isValidPassword()) {
-      Player.onConnect(socket);
-      socket.emit('signInResponse', { success: true });
-    } else {
-      socket.emit('signInResponse', { success: false });
-    }
+    isValidPassword(data.username, data.password, (res) => {
+      if (res) {
+        Player.onConnect(socket);
+        socket.emit('signInResponse', { success: true });
+      } else {
+        socket.emit('signInResponse', { success: false });
+      }
+    });
   });
 
   socket.on('signUp', (data) => {
-    if (isUserNameTaken(data.username)) {
-      socket.emit('signUpResponse',
-        { success: false, message: 'Username already exists' }
-      );
-    } else {
-      addUser(data.username, data.password)
-      socket.emit('signUpResponse', { success: true });
-    }
+    isUserNameTaken(data.username, (res) => {
+      if (res) {
+        socket.emit('signUpResponse',
+          { success: false, message: 'Username already exists' }
+        );
+      } else {
+        addUser(data.username, data.password, () => {
+          socket.emit('signUpResponse', { success: true });
+        });
+      }
+    })
   });
 
   socket.on('disconnect', () => {
