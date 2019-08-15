@@ -13,16 +13,31 @@
       <h1> Game! </h1>
     </header>
     <main>
-      <!-- TODO: cleanup -->
-      <canvas id="ctx" width="500" height="500" style="border: 1px solid black "></canvas>
 
-      <div id="chat-text" style="width: 500px; height: 100px; overflow-y: scroll;">
-        <p>Welcome!</p>
+      <!-- TODO: cleanup -->
+
+      <div id="auth">
+        <label>
+          Username: <input type="text" name="username" id="username">
+        </label>
+        <label>
+          Password: <input type="password" name="password" id="password">
+        </label>
+        <button id="sign-in">Sign In</button>
+        <button id="sign-up">Sign Up</button>
       </div>
 
-      <form action="" id="chat-form">
-        <input type="text" id="chat-input" style="width: 500px;">
-      </form>
+      <div id="game" style="display: none;">
+        <canvas id="ctx" width="500" height="500" style="border: 1px solid black "></canvas>
+
+        <div id="chat-text" style="width: 500px; height: 100px; overflow-y: scroll;">
+          <p>Welcome!</p>
+        </div>
+
+        <form action="" id="chat-form">
+          <input type="text" id="chat-input" style="width: 500px;">
+        </form>
+      </div>
 
     </main>
     <br>

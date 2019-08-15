@@ -141,3 +141,25 @@ describe.skip('Bullets tests', () => {
         expect.fail('TODO');
     });
 });
+
+describe.skip('Authentication tests', () => {
+
+    it('user cannot sign in with invalid username and password', async () => {
+        expect.fail('TODO');
+    });
+
+    it('user can sign in with valid username and password', () => {
+        expect.fail('TODO');
+    });
+
+    it('user cannot create an account with existing username', () => {
+        expect.fail('TODO');
+    });
+
+    it('user can create an account with new username', () => {
+        expect.fail('TODO');
+    });
+
+    // TODO: selenium for checking UI messages too
+});
+

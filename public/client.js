@@ -1,11 +1,49 @@
+const socket = io();
+
+// Auth
+const authDiv = document.querySelector('div#auth');
+const usernameInput = document.querySelector('input#username');
+const passwordInput = document.querySelector('input#password');
+const signInBtn = document.querySelector('button#sign-in');
+const signUpBtn = document.querySelector('button#sign-up');
+
+signInBtn.addEventListener('click', (event) => {
+    socket.emit('signIn', {
+        username: usernameInput.value, password: passwordInput.value
+    })
+});
+socket.on('signInResponse', (data) => {
+    if (data.success) {
+        authDiv.style.display = 'none';
+        gameDiv.style.display = 'inline-block';
+    } else {
+        // TODO: instead display error div
+        alert('Sign in failed :/');
+    }
+});
+
+signUpBtn.addEventListener('click', (event) => {
+    socket.emit('signUp', {
+        username: usernameInput.value, password: passwordInput.value
+    })
+});
+socket.on('signUpResponse', (data) => {
+    if (data.success) {
+        // TODO: instead display success div && sign in automatically
+        alert('Sign up successful :D');
+    } else {
+        // TODO: instead display error div
+        alert(`Sign up failed: ${data.message}`);
+    }
+});
+
+// Game
+const gameDiv = document.querySelector('div#game');
 const ctx = document.querySelector('canvas#ctx').getContext('2d');
 ctx.font = '30px Roboto';
-
 const chatText = document.querySelector('div#chat-text');
 const chatInput = document.querySelector('input#chat-input');
 const chatForm = document.querySelector('form#chat-form');
-
-const socket = io();
 
 socket.on('evalAnswer', (data) => {
     console.log(data);

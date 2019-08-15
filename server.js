@@ -26,6 +26,19 @@ const listener = server.listen(PORT, () => {
 
 const SOCKETS = {};
 
+const USERS = {
+  'dave': 'admin'
+};
+const isUserNameTaken = (username) => {
+  return USERS[username];
+};
+const addUser = (username, password) => {
+  return USERS[username] = password;
+};
+const isValidPassword = (username, password) => {
+  return USERS[username] == password;
+};
+
 const { Player, Bullet } = require('./server/entities');
 const { generateId } = require('./server/util');
 const io = require('socket.io')(server);
@@ -35,7 +48,25 @@ io.on('connection', (socket) => {
   SOCKETS[socket.id] = socket;
   console.log(`A user connected (${socket.id})`);
 
-  Player.onConnect(socket);
+  socket.on('signIn', (data) => {
+    if (isValidPassword()) {
+      Player.onConnect(socket);
+      socket.emit('signInResponse', { success: true });
+    } else {
+      socket.emit('signInResponse', { success: false });
+    }
+  });
+
+  socket.on('signUp', (data) => {
+    if (isUserNameTaken(data.username)) {
+      socket.emit('signUpResponse',
+        { success: false, message: 'Username already exists' }
+      );
+    } else {
+      addUser(data.username, data.password)
+      socket.emit('signUpResponse', { success: true });
+    }
+  });
 
   socket.on('disconnect', () => {
     // Note: disconnect event doesn't accept "socket" argument
