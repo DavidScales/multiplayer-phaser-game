@@ -91,6 +91,10 @@ describe('Player tests', () => {
     it.skip('player coordinates are updated on key press', () => {
         expect.fail('TODO');
     });
+
+    it.skip('player can create bullets on key press', () => {
+        expect.fail('TODO');
+    });
 });
 
 describe('Player tests', () => {
@@ -126,6 +130,14 @@ describe.skip('Bullets tests', () => {
     });
 
     it('bullets are removed after X frames', () => {
+        expect.fail('TODO');
+    });
+
+    it('bullets are removed after collision with players', () => {
+        expect.fail('TODO');
+    });
+
+    it('bullets do not collide with parent player', () => {
         expect.fail('TODO');
     });
 });

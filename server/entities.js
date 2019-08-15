@@ -15,6 +15,9 @@ class Entity {
         this.x += this.speedX;
         this.y += this.speedY;
     }
+    getDistanceFrom(point) {
+        return Math.sqrt(Math.pow(this.x - point.x, 2) + Math.pow(this.y - point.y, 2));
+    }
 }
 
 class Player extends Entity {
@@ -26,6 +29,8 @@ class Player extends Entity {
         this.pressingLeft = false;
         this.pressingUp = false;
         this.pressingDown = false;
+        this.pressingAttack = false;
+        this.mouseAngle = 0;
         this.maxSpeed = 10;
         // Add player to "global" players object
         Player.players[id] = this;
@@ -33,6 +38,14 @@ class Player extends Entity {
     update() {
         this.updateSpeed();
         super.update();
+        if (this.pressingAttack) {
+            this.shootBullet(this.mouseAngle, this.id);
+        }
+    }
+    shootBullet(angle, parent) {
+        const bullet = new Bullet(angle, parent);
+        bullet.x = this.x;
+        bullet.y = this.y;
     }
     updateSpeed() {
         if      (this.pressingRight) { this.speedX = this.maxSpeed; }
@@ -44,10 +57,12 @@ class Player extends Entity {
         else                         { this.speedY = 0;              }
     }
     setPressingKey(inputId, state) {
-        if      (inputId == 'right') { this.pressingRight = state; }
-        else if (inputId == 'left')  { this.pressingLeft = state; }
-        else if (inputId == 'up')    { this.pressingUp = state; }
-        else if (inputId == 'down')  { this.pressingDown = state; }
+        if      (inputId == 'right')  { this.pressingRight = state; }
+        else if (inputId == 'left')   { this.pressingLeft = state; }
+        else if (inputId == 'up')     { this.pressingUp = state; }
+        else if (inputId == 'down')   { this.pressingDown = state; }
+        else if (inputId == 'attack') { this.pressingAttack = state; }
+        else if (inputId == 'mouseAngle')   { this.mouseAngle = state; }
     }
     static onConnect(socket) {
         const player = new Player(socket.id);
@@ -80,11 +95,12 @@ class Player extends Entity {
 Player.players = {};
 
 class Bullet extends Entity {
-    constructor(angle) {
+    constructor(angle, parent) {
         super();
         this.id = generateId();
         this.speedX = Math.cos(angle / 180 * Math.PI) * 10;
         this.speedY = Math.sin(angle / 180 * Math.PI) * 10;
+        this.parent = parent;
         this.timer = 0;
         this.toRemove = false;
         Bullet.bullets[this.id] = this;
@@ -92,32 +108,34 @@ class Bullet extends Entity {
     update() {
         if (this.timer++ > Bullet.durationInFrames) { this.toRemove = true; }
         super.update();
+
+        for (let i in Player.players) {
+            const player = Player.players[i];
+            if (this.getDistanceFrom(player) < 32 && this.parent != player.id) {
+                this.toRemove = true;
+                // handle collision - hp and such
+            }
+        }
     }
     // TODO: unsure
     static destroy(id) {
         delete Bullet.bullets[id];
     }
     static updateBullets() {
-        // TODO: temp
-        if (Math.random() < 0.1) {
-            new Bullet(Math.random() * 360);
-        }
 
         // TODO: clean up
         const pack = [];
         for (let id in Bullet.bullets) {
             let bullet = Bullet.bullets[id];
-
-            // TODO: unsure
             if (bullet.toRemove) {
                 Bullet.destroy(bullet.id);
+            } else {
+                bullet.update();
+                pack.push({
+                    x: bullet.x,
+                    y: bullet.y
+                });
             }
-
-            bullet.update();
-            pack.push({
-                x: bullet.x,
-                y: bullet.y
-            });
         }
         return pack;
     }
