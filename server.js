@@ -34,18 +34,45 @@ const dbFile = path.join(dataFolder, 'sqlite.db');
 const dbExists = fs.existsSync(dbFile);
 const sqlite3 = require('sqlite3').verbose();
 const db = new sqlite3.Database(dbFile);
+
+// const createTable = (db, name, columns) => {
+//   /** columns {
+//    *  columnName: columnType
+//    * } */
+// };
+// const queryTable = (db, tableName, { column: value })
+// const insert = (db, tableName, {column(s): values(s) })
+
+// TODO: probably learn more about SQL
 db.serialize(function(){
   if (!dbExists) {
-    db.run('CREATE TABLE Dreams (dream TEXT)');
-    console.log('New table Dreams created!');
+    let columns = [
+      'username TEXT PRIMARY KEY UNIQUE NOT NULL',
+      'password TEXT NOT NULL', // TODO: Should be hash
+      'created TEXT DEFAULT CURRENT_TIMESTAMP'
+    ];
+    db.run(`CREATE TABLE account (${columns.join(', ')});`);
+    console.log('New table "account" created');
 
+    const mockUsers = [
+      { username: 'dave', password: 'cool' },
+      { username: 'skip', password: 'neat' },
+    ];
     db.serialize(function() {
-      db.run('INSERT INTO Dreams (dream) VALUES ("Find and count some sheep"), ("Climb a really tall mountain"), ("Wash the dishes")');
+      mockUsers.forEach(user => {
+        const columns = Object.keys(user);
+        const columnStr = columns.join(', ');
+        const valuesStr = columns.map(key => user[key])
+                                 .map(str => `'${str}'`)
+                                 .join(', ');
+        console.log(`INSERT INTO account (${columnStr}) VALUES (${valuesStr});`);
+        db.run(`INSERT INTO account (${columnStr}) VALUES (${valuesStr});`);
+      });
     });
   }
   else {
-    console.log('Database "Dreams" ready to go!');
-    db.each('SELECT * from Dreams', function(err, row) {
+    console.log('Database "account" already exists');
+    db.each('SELECT * from account;', function(err, row) {
       if ( row ) {
         console.log('record:', row);
       }
@@ -53,14 +80,24 @@ db.serialize(function(){
   }
 });
 
-// endpoint to get all the dreams in the database
-// currently this is the only endpoint, ie. adding dreams won't update the database
-// read the sqlite3 module docs and try to add your own! https://www.npmjs.com/package/sqlite3
-app.get('/getDreams', function(request, response) {
-  db.all('SELECT * from Dreams', function(err, rows) {
-    response.send(JSON.stringify(rows));
-  });
-});
+// db.serialize(function(){
+//   if (!dbExists) {
+//     db.run('CREATE TABLE Dreams (dream TEXT);');
+//     console.log('New table "Dreams" created');
+
+//     db.serialize(function() {
+//       db.run('INSERT INTO Dreams (dream) VALUES ("Find and count some sheep"), ("Climb a really tall mountain"), ("Wash the dishes");');
+//     });
+//   }
+//   else {
+//     console.log('Database "Dreams" ready to go!');
+//     db.each('SELECT * from Dreams;', function(err, row) {
+//       if ( row ) {
+//         console.log('record:', row);
+//       }
+//     });
+//   }
+// });
 
 
 /** Websockets and game logic */
