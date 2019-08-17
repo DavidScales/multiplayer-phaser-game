@@ -163,3 +163,9 @@ describe.skip('Authentication tests', () => {
     // TODO: selenium for checking UI messages too
 });
 
+describe.skip('Database tests', () => {
+
+    it('Database is created on start up', async () => {
+        expect.fail('TODO');
+    });
+});
