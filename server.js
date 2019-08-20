@@ -22,114 +22,15 @@ const listener = server.listen(PORT, () => {
   console.log('App is listening on port ' + listener.address().port);
 });
 
-/** Database */
-
-
-// init sqlite db
-const fs = require('fs');
-const path = require('path');
-const dataFolder = path.join(__dirname, '.data');
-if (!fs.existsSync(dataFolder)) { fs.mkdirSync(dataFolder); }
-const dbFile = path.join(dataFolder, 'sqlite.db');
-const dbExists = fs.existsSync(dbFile);
-const sqlite3 = require('sqlite3').verbose();
-const db = new sqlite3.Database(dbFile);
-
-// const createTable = (db, name, columns) => {
-//   /** columns {
-//    *  columnName: columnType
-//    * } */
-// };
-// const queryTable = (db, tableName, { column: value })
-// const insert = (db, tableName, {column(s): values(s) })
-
-// TODO: probably learn more about SQL
-db.serialize(function(){
-  if (!dbExists) {
-    let columns = [
-      'username TEXT PRIMARY KEY UNIQUE NOT NULL',
-      'password TEXT NOT NULL', // TODO: Should be hash
-      'created TEXT DEFAULT CURRENT_TIMESTAMP'
-    ];
-    db.run(`CREATE TABLE account (${columns.join(', ')});`);
-    console.log('New table "account" created');
-
-    const mockUsers = [
-      { username: 'dave', password: 'cool' },
-      { username: 'skip', password: 'neat' },
-    ];
-    db.serialize(function() {
-      mockUsers.forEach(user => {
-        const columns = Object.keys(user);
-        const columnStr = columns.join(', ');
-        const valuesStr = columns.map(key => user[key])
-                                 .map(str => `'${str}'`)
-                                 .join(', ');
-        console.log(`INSERT INTO account (${columnStr}) VALUES (${valuesStr});`);
-        db.run(`INSERT INTO account (${columnStr}) VALUES (${valuesStr});`);
-      });
-    });
-  }
-  else {
-    console.log('Database "account" already exists');
-    db.each('SELECT * from account;', function(err, row) {
-      if ( row ) {
-        console.log('record:', row);
-      }
-    });
-  }
-});
-
-// db.serialize(function(){
-//   if (!dbExists) {
-//     db.run('CREATE TABLE Dreams (dream TEXT);');
-//     console.log('New table "Dreams" created');
-
-//     db.serialize(function() {
-//       db.run('INSERT INTO Dreams (dream) VALUES ("Find and count some sheep"), ("Climb a really tall mountain"), ("Wash the dishes");');
-//     });
-//   }
-//   else {
-//     console.log('Database "Dreams" ready to go!');
-//     db.each('SELECT * from Dreams;', function(err, row) {
-//       if ( row ) {
-//         console.log('record:', row);
-//       }
-//     });
-//   }
-// });
-
-
 /** Websockets and game logic */
 
 const SOCKETS = {};
 
-const USERS = {
-  'dave': 'admin'
-};
-// TODO: consider promise-based alternatives
-const isUserNameTaken = (username, cb) => {
-  setTimeout(() => {
-    cb(USERS[username]);
-  }, 10);
-
-};
-const addUser = (username, password, cb) => {
-  setTimeout(() => {
-    USERS[username] = password;
-    cb();
-  }, 10);
-
-};
-const isValidPassword = (username, password, cb) => {
-  setTimeout(() => {
-    cb(USERS[username] == password);
-  }, 10);
-};
-
 const { Player, Bullet } = require('./server/entities');
 const { generateId } = require('./server/util');
 const io = require('socket.io')(server);
+const { Database } = require('./server/database');
+const DB = new Database();
 
 io.on('connection', (socket) => {
   socket.id = generateId();
@@ -137,7 +38,7 @@ io.on('connection', (socket) => {
   console.log(`A user connected (${socket.id})`);
 
   socket.on('signIn', (data) => {
-    isValidPassword(data.username, data.password, (res) => {
+    DB.isValidUser(data.username, data.password, (res) => {
       if (res) {
         Player.onConnect(socket);
         socket.emit('signInResponse', { success: true });
@@ -148,13 +49,13 @@ io.on('connection', (socket) => {
   });
 
   socket.on('signUp', (data) => {
-    isUserNameTaken(data.username, (res) => {
+    DB.isUserNameTaken(data.username, (res) => {
       if (res) {
         socket.emit('signUpResponse',
           { success: false, message: 'Username already exists' }
         );
       } else {
-        addUser(data.username, data.password, () => {
+        DB.addUser(data.username, data.password, () => {
           socket.emit('signUpResponse', { success: true });
         });
       }
